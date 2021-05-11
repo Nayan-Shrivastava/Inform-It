@@ -12,12 +12,12 @@ const port = 8000;
 
 dotenv.config();
 
-/*
+
 // Connect to DB
-mongoose.connect(process.env.MONGO_URL ,{ useNewUrlParser: true, useUnifiedTopology: true },() => {
-    console.log('Connected to MONGO DB')
-});
-*/
+mongoose.connect(process.env.MONGO_URL ,{ useNewUrlParser: true, useUnifiedTopology: true , useFindAndModify: false })
+.then((result) => app.listen(port,() => console.log(`Listening on port ${port}`)))
+.catch((err) => console.log(err));
+
 // middleware
 app.use(express.json());
 app.use(helmet());
@@ -43,4 +43,4 @@ app.get("/api", (req,res) => {
 
 
 // Listen on port 5000
-app.listen(port,() => console.log(`Listening on port ${port}`))
+//app.listen(port,() => console.log(`Listening on port ${port}`))
