@@ -1,9 +1,18 @@
 const router = require("express").Router();
-
-
-router.get("/:id", async(req,res) => {
-    
-    res.send(`Hey it's section == ${req.params.id}`)
+const Section = require("../models/Section");
+// Get Section object
+router.get("/get-section", async(req,res) => {
+   const id = req.body.sectionId;
+   console.log(id);
+    Section.findById(id)
+    .then((result) => {
+        console.log(result);
+        res.status(200).json(result);
+    })
+    .catch((err) => {
+        console.log(err);
+        res.status(404).json("section not found");
+     });
 });
 
 

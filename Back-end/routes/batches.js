@@ -56,8 +56,8 @@ router.post("/create_section/", async (req,res) => {
 });
 
 // Get batch object with all it's sections
-router.get("/sections/:id", async(req,res) => {
-    const id = req.params.id;
+router.get("/get-all-sections", async(req,res) => {
+    const id = req.body.batchId;
     
     Batch.findById(id)
     .then((result) => {
@@ -96,8 +96,8 @@ router.get("/sections/:id", async(req,res) => {
 
 
 // Get Batch object
-router.get("/:id", async(req,res) => {
-   const id = req.params.id;
+router.get("/get-batch", async(req,res) => {
+   const id = req.body.batchId;
     Batch.findById(id)
     .then((result) => {
         console.log(result);

@@ -1,13 +1,17 @@
 const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema({
-	name:{type: String},
+	name : {
+		type : String,
+		require : true,
+		default : null,
+	},
 	username : {
 		type:String,
 		require: true,
 		default:null,
 		unique:true
-	},
+	}, 
 	email : {
 		type:String,
 		lowercase:true,
@@ -16,14 +20,17 @@ const UserSchema = new mongoose.Schema({
 		max:70,
 		unique:true,
 	},
-	age:{type:Number},
+	age:{
+		type:Number,
+		default : null,
+	},
 	password:{
 		type:String,
 		required:true,
 		min:6
 	},
 	batchesId:{type:Array,default:[]},
-	mobile_number:{type:Number,minlength:10}
+	mobile_number:{type:Number,minlength:10,default : null,}
 }
 );
 

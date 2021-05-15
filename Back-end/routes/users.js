@@ -1,16 +1,35 @@
 const router = require("express").Router();
 const User = require("../models/User");
 const Batch = require("../models/Batch");
+const bcrypt = require("bcrypt");
+
+router.post("/login", async (req,res) => {
+
+    try{
+        const user = await User.findOne({username:req.body.username});
+        !user && res.status(404).json("user not found");
+
+        const validPassword = await bcrypt.compare(req.body.password, user.password)
+        !validPassword && res.status(400).json("wrong password");
+        res.status(200).json(user);
+    } catch(err){
+        res.status(500).json(err);
+    }
+    
+});
 
 router.post("/create_user", async (req,res) => {
 
 	try{
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(req.body.password,salt);
 		const newUser = new User({
 			name : req.body.name,
 			username : req.body.username,
 			email : req.body.email,
 			age : req.body.age,
-			password : req.body.password,
+			password : hashedPassword,
+            mobile_number : req.body.mobile_number,
 			batchesId : req.body.batchesId, //"6093c2d48cf4d01e9c62268f"   "6093caecab066b0220147a1c"
 		});
 
@@ -71,8 +90,8 @@ router.post("/create_batch/:id", async (req,res) => {
 });
 
 // Get user object with all batches
-router.get("/batches/:id", async(req,res) => {
-    const id = req.params.id;
+router.get("/get-all-batches", async(req,res) => {
+    const id = req.body.userId;
     
     User.findById(id)
     .then((result) => {
@@ -110,8 +129,8 @@ router.get("/batches/:id", async(req,res) => {
 
 
 // Get user object
-router.get("/:id", async(req,res) => {
-    const id = req.params.id;
+router.get("/get-user", async(req,res) => {
+    const id = req.body.userId;
     console.log("hey");
     User.findById(id)
     .then((result) => {

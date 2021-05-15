@@ -7,11 +7,15 @@ const morgan = require('morgan')
 const batchesRoute = require("./routes/batches");
 const usersRoute = require("./routes/users");
 const sectionsRoute = require("./routes/sections");
+
+const cors = require('cors');
+app.use(cors())
+
 // Port Number
 const port = 8000;
 
 dotenv.config();
-
+console.log(process.env.MONGO_URL);
 
 // Connect to DB
 mongoose.connect(process.env.MONGO_URL ,{ useNewUrlParser: true, useUnifiedTopology: true , useFindAndModify: false })
