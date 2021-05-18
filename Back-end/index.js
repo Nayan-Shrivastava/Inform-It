@@ -30,7 +30,6 @@ app.use(morgan("common"));
 app.set('view engine','ejs');
 
 
-
 app.use("/api/batches",batchesRoute);
 app.use("/api/users",usersRoute);
 app.use("/api/sections",sectionsRoute);
