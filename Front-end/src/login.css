@@ -1,0 +1,13 @@
+/* .outercontainer {
+  display: block !important;
+}
+.imageDiv{
+    max-width: 50%;
+}
+
+@media  (min-width: 768px) {
+  .outercontainer {
+    display: flex !important;
+  }
+} */
+
