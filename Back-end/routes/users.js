@@ -10,10 +10,10 @@ router.post("/login", async (req,res) => {
 
     try{
         const user = await User.findOne({username:req.body.username});
-        !user && res.status(404).json("user not found");
+        !user && res.status(404).json({"error" :"user not found"});
 
         const validPassword = await bcrypt.compare(req.body.password, user.password)
-        !validPassword && res.status(400).json("wrong password");
+        !validPassword && res.status(400).json({"error" :"wrong password"});
         console.log(process.env.SECRET_KEY);
         jwt.sign(user.toJSON(),process.env.SECRET_KEY, (err,token) => {
             if(err){
@@ -125,7 +125,7 @@ router.post("/create_batch/",verifyToken,async (req,res) => {
 });
 
 // Get user object with all batches
-router.get("/get-all-batches",verifyToken, async(req,res) => {
+router.post("/get-all-batches",verifyToken, async(req,res) => {
     verifyUser(req,res,(authData) => {
         id = authData._id;   
     });
@@ -166,7 +166,7 @@ router.get("/get-all-batches",verifyToken, async(req,res) => {
 
 
 // Get user object
-router.get("/get-user", verifyToken,async(req,res) => {
+router.post("/get-user", verifyToken,async(req,res) => {
     //console.log("Hey");
     verifyUser(req,res,(authData) => {
         id = authData._id;
@@ -187,7 +187,7 @@ router.get("/get-user", verifyToken,async(req,res) => {
 
 
 
-router.get("/", (req,res) => {
+router.post("/", (req,res) => {
     res.send("Hey it's Users route")
 });
 module.exports = router;

@@ -34,6 +34,8 @@ const verifyToken = (req,res,next) => {
         //console.log(bearerToken);
         next();
     }else{
+        //console.log("verifytoken ", bearerHeader, bearerToken)
+        //console.log(req.headers)
         res.status(403).json(data);
     }
 

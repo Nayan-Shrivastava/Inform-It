@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const Section = require("../models/Section");
 // Get Section object
-router.get("/get-section", async(req,res) => {
+router.post("/get-section", async(req,res) => {
    const id = req.body.sectionId;
    console.log(id);
     Section.findById(id)
