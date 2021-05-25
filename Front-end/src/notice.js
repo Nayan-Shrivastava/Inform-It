@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import axios from "axios";
 import AppBar from "@material-ui/core/AppBar";
 import Button from "@material-ui/core/Button";
 import AnnouncementIcon from "@material-ui/icons/Announcement";
 import Card from "@material-ui/core/Card";
+import Logout from "./logout";
 import CardContent from "@material-ui/core/CardContent";
 import CardMedia from "@material-ui/core/CardMedia";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -13,13 +14,15 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
-import Logout from "./logout";
 import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import "./index.css";
+import ReactQuill, { Quill } from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const useStyles = makeStyles((theme) => ({
   icon: {
@@ -40,7 +43,6 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
     display: "flex",
     flexDirection: "column",
-    
   },
   cardMedia: {
     paddingTop: "56.25%", // 16:9
@@ -53,36 +55,70 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(6),
   },
 }));
-
-const images = ["p.png"];
-export default function Template() {
+const images = ["p1.png"];
+export default function Section(props) {
+  const modules = {
+    toolbar: {
+      
+      container: [
+        [ "image"],
+        [{ header: "1" }, { header: "2" }, { font: [] }],
+        [{ size: [] }],
+        ["bold", "italic", "underline", "strike", "blockquote"],
+        [
+          { list: "ordered" },
+          { list: "bullet" },
+          { indent: "-1" },
+          { indent: "+1" },
+        ],
+        ["link"],
+        ["clean"],
+      ],
+    },
+  };
+  const formats = [
+    "header",
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "blockquote",
+    "list",
+    "bullet",
+    "indent",
+    "link",
+    "image",
+  ];
   const classes = useStyles();
   const history = useHistory();
   const [cards, setCards] = useState([]);
+  const [name, setName] = useState("");
+  const location = useLocation();
+  //for create section
   const [open, setOpen] = useState(false);
-  const [open2, setOpen2] = useState(false);
-  const [batchId, setBatchId] = useState("");
-  const [invalidBatch, setInvalidBatch] = useState("");
-  const [batchName, setBatchName] = useState("");
-  const [batchDescription, setBatchDescription] = useState("");
+  const [invalidMessage, setInvalidMessage] = useState("");
+  const [heading, setHeading] = useState("");
+  const [subHeading, setSubHeading] = useState("");
+  const [body, setBody] = useState("");
+  const [by, setBy] = useState("");
+  const [priority, setPriority] = useState("");
+  const [impLinks, setImpLinks] = useState("");
+  const [deadline, setDeadline] = useState("");
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-  const handleClickOpen2 = () => {
-    setOpen2(true);
-  };
-
+  function handleOnCard(id) {
+    console.log(id);
+  }
   const handleOnTokenNotFound = () => {
     history.push({ pathname: "/login" });
   };
-  function handleOnCard(id) {
-    history.push({ pathname: "/section", state: id });
-  }
-  //console.log("token ", localStorage.getItem("token"));
   if (localStorage.getItem("token") === null) {
     handleOnTokenNotFound();
   }
+  //  console.log(localStorage.getItem("token"));
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
   let axiosConfig = {
     headers: {
       "Content-Type": "application/json;charset=UTF-8",
@@ -92,33 +128,44 @@ export default function Template() {
   };
   const handleCancel = () => {
     setOpen(false);
-    setOpen2(false);
-    setInvalidBatch("");
-    setBatchId("");
-    setBatchName("");
-    setBatchDescription("");
+    setInvalidMessage("");
+    setHeading("");
+    setSubHeading("");
+    setBody("");
+    setPriority("");
+    setImpLinks("");
+    setDeadline("");
+    setBy("");
   };
-  const handleCreateClose = (e) => {
+  const handleOnClose = (e) => {
     e.preventDefault();
-    const ob = { name: batchName, description: batchDescription };
-    console.log(ob);
-    if (batchName === "") {
-      setInvalidBatch("*Please fill out this field");
+    const ob = {
+      heading: heading,
+      subHeading: subHeading,
+      body: body,
+      priority: priority,
+      impLinks: impLinks,
+      deadline: deadline,
+      by: by,
+    };
+    console.log("hi ", ob);
+    console.log("body", body);
+    if (heading === "") {
+      setInvalidMessage("*Please fill out this field");
     } else {
       axios
-        .post("http://localhost:8000/api/users/create-batch", ob, axiosConfig)
+        .post(
+          "http://localhost:8000/api/sections/create-notice",
+          ob,
+          axiosConfig
+        )
         .then(function (response) {
-          //handle Success
-          // console.log("hi", response);
           console.log(response);
-          if ("error" in response.data) {
-            handleOnTokenNotFound();
-          } else {
-            console.log("sahi h", response.data);
-            setInvalidBatch("");
-            setOpen2(false);
-            window.location.reload(false);
-          }
+
+          console.log("sahi h", response.data);
+          setInvalidMessage("");
+          setOpen(false);
+          //window.location.reload(false);
         })
         .catch(function (error) {
           // handle error
@@ -126,55 +173,26 @@ export default function Template() {
         });
     }
   };
-  const handleClose = (e) => {
-    e.preventDefault();
-
-    const ob = { batchId: batchId };
-
-    axios
-      .post("http://localhost:8000/api/users/add-batch", ob, axiosConfig)
-      .then(function (response) {
-        //handle Success
-        // console.log("hi", response);
-        if ("error" in response.data) {
-          console.log(response);
-          if (response.data.error === "batch not found") {
-            //console.log("batch not found");
-            if (batchId === "") {
-              setInvalidBatch("*Please fill out this field");
-            } else {
-              setInvalidBatch("*Invalid Batch Id");
-            }
-          } else {
-            console.log("some other error");
-            handleOnTokenNotFound();
-          }
-        } else {
-          console.log("sahi h", response.data);
-          setInvalidBatch("");
-          setOpen(false);
-
-          window.location.reload(false);
-        }
-      })
-      .catch(function (error) {
-        // handle error
-        console.log(error);
-      });
-  };
-  const ob = {};
   useEffect(() => {
+    console.log("hi ", location.state);
+
     axios
-      .post("http://localhost:8000/api/users/get-all-batches", ob, axiosConfig)
+      .post(
+        "http://localhost:8000/api/sections/get-all-notices",
+        { sectionId: location.state },
+        axiosConfig
+      )
       .then(function (response) {
         //handle Success
         if ("error" in response.data) {
           console.log(response);
-          handleOnTokenNotFound();
+          //handleOnTokenNotFound();
         } else {
-          //console.log(response.data);
+          console.log("hii", response);
+          setCards(response.data.arrnotices);
+          setName(response.data.name);
+
           // console.log("hello ");
-          setCards(response.data.arrbatches);
         }
       })
       .catch(function (error) {
@@ -182,7 +200,6 @@ export default function Template() {
         console.log(error);
       });
   }, []);
-
   return (
     <React.Fragment>
       <CssBaseline />
@@ -206,7 +223,7 @@ export default function Template() {
               color="textPrimary"
               gutterBottom
             >
-              Your Batches
+              {name}
             </Typography>
             <Typography
               variant="h5"
@@ -214,7 +231,7 @@ export default function Template() {
               color="textSecondary"
               paragraph
             >
-              Here are All Your Batches.
+              Here are All Your Notices.
             </Typography>
             <div className={classes.heroButtons}>
               <Grid container spacing={2} justify="center">
@@ -224,93 +241,115 @@ export default function Template() {
                     color="primary"
                     onClick={handleClickOpen}
                   >
-                    Add Batch
+                    Create Notice
                   </Button>
                   <Dialog
                     open={open}
-                    onClose={handleClose}
+                    onClose={handleOnClose}
                     fullWidth
                     aria-labelledby="form-dialog-title"
                   >
                     <DialogTitle id="form-dialog-title">
-                      Join a Batch :{" "}
-                    </DialogTitle>
-                    <DialogContent>
-                      <DialogContentText>Enter Batch Id : </DialogContentText>
-                      <TextField
-                        autoFocus
-                        margin="dense"
-                        id="Batch Id"
-                        label="Batch Id"
-                        type="text"
-                        fullWidth
-                        required
-                        onChange={(e) => setBatchId(e.target.value)}
-                      />
-                      {invalidBatch !== undefined && (
-                        <p style={{ color: "red" }}>{invalidBatch}</p>
-                      )}
-                    </DialogContent>
-                    <DialogActions>
-                      <Button onClick={handleCancel} color="primary">
-                        Cancel
-                      </Button>
-                      <Button onClick={handleClose} color="primary">
-                        Submit
-                      </Button>
-                    </DialogActions>
-                  </Dialog>
-                </Grid>
-                <Grid item>
-                  <Button
-                    variant="outlined"
-                    color="primary"
-                    onClick={handleClickOpen2}
-                  >
-                    Create Batch
-                  </Button>
-                  <Dialog
-                    open={open2}
-                    onClose={handleCreateClose}
-                    fullWidth
-                    aria-labelledby="form-dialog-title"
-                  >
-                    <DialogTitle id="form-dialog-title">
-                      Create a Batch :{" "}
+                      Create a Notice :{" "}
                     </DialogTitle>
                     <DialogContent>
                       <DialogContentText>
-                        Enter Batch Details :{" "}
+                        Enter Notice Details :{" "}
                       </DialogContentText>
                       <TextField
                         autoFocus
                         margin="dense"
-                        id="Batch Name"
-                        label="Batch Name"
+                        id="heading"
+                        label="Heading"
                         type="text"
+                        variant="outlined"
                         fullWidth
                         required
-                        onChange={(e) => setBatchName(e.target.value)}
+                        onChange={(e) => setHeading(e.target.value)}
                       />
-                      {invalidBatch !== undefined && (
-                        <p style={{ color: "red" }}>{invalidBatch}</p>
-                      )}
+                      {/* {invalidMessage !== undefined && (
+                        <p style={{ color: "red" }}>{invalidMessage}</p>
+                      )} */}
                       <TextField
+                        autoFocus
+                        margin="dense"
+                        id="subHeading"
+                        label="Sub Heading"
+                        type="text"
+                        variant="outlined"
+                        fullWidth
+                        required
+                        onChange={(e) => setSubHeading(e.target.value)}
+                      />
+                      {/* <TextField
                         autoFocus
                         multiline="true"
                         margin="dense"
-                        id="Description"
-                        label="Description"
+                        id="body"
+                        label="Body"
                         type="text"
                         fullWidth
-                        onChange={(e) => setBatchDescription(e.target.value)}
+                        onChange={(e) => setBody(e.target.value)}
+                      /> */}
+                      <ReactQuill
+                        value={body}
+                        theme="snow"
+                        placeholder = "Body..."
+                        modules={modules}
+                        format={formats}
+                        onChange={(content) => setBody(content)}
+                      />
+                      <br />
+                      <TextField
+                        autoFocus
+                        margin="dense"
+                        id="by"
+                        label="By"
+                        type="text"
+                        variant="outlined"
+                        fullWidth
+                        required
+                        onChange={(e) => setBy(e.target.value)}
+                      />
+                      <TextField
+                        autoFocus
+                        margin="dense"
+                        id="priority"
+                        label="Priority"
+                        variant="outlined"
+                        type="text"
+                        fullWidth
+                        required
+                        onChange={(e) => setPriority(e.target.value)}
+                      />
+                      <TextField
+                        autoFocus
+                        margin="dense"
+                        id="impLinks"
+                        label="Important Links"
+                        type="text"
+                        variant="outlined"
+                        fullWidth
+                        required
+                        onChange={(e) => setImpLinks(e.target.value)}
+                      />
+                      <TextField
+                        autoFocus
+                        margin="dense"
+                        id="deadline"
+                        label="Deadline"
+                        type="text"
+                        fullWidth
+                        variant="outlined"
+                        required
+                        onChange={(e) => setDeadline(e.target.value)}
                       />
                     </DialogContent>
                     <DialogActions>
                       <Button onClick={handleCancel} color="primary">
                         Cancel
                       </Button>
-                      <Button onClick={handleCreateClose} color="primary">
+                      <Button onClick={handleOnClose} color="primary">
                         Submit
                       </Button>
                     </DialogActions>
@@ -324,11 +363,20 @@ export default function Template() {
           {/* End hero unit */}
           <Grid container spacing={4}>
             {cards.map(
-              ({ index, name, description, createdAt, superAdmin, _id }) => (
+              ({
+                index,
+                heading,
+                createdAt,
+                createdBy,
+                priority,
+                deadline,
+                impLinks,
+                _id,
+              }) => (
                 <Grid item key={index} xs={12} sm={6} md={4}>
                   <Card
                     className={classes.index}
-                    style={{ minHeight: "400px", maxHeight: "400px" }}
+                    style={{ minHeight: "450px", maxHeight: "450px" }}
                     onClick={() => {
                       handleOnCard(_id);
                     }}
@@ -340,21 +388,27 @@ export default function Template() {
                     />
                     <CardContent className={classes.cardContent}>
                       <Typography gutterBottom variant="h5" component="h2">
-                        {name}
+                        {heading}
                       </Typography>
-                      <Typography >
-                        {description.length > 100 &&
+                      <Typography>{deadline}</Typography>
+
+                      <Typography>{impLinks}</Typography>
+                      <br />
+                      <Typography>{priority}</Typography>
+
+                      {/* <Typography>
+                        {/* {description.length > 100 &&
                           `${description.substring(0, 100)}...`}
 
-                        {description.length <= 100 && `${description}`}
-                      </Typography>
+                        {description.length <= 100 && `${description}`} 
+                      </Typography> */}
                       <br />
                       <Typography>
                         Created On : {createdAt.slice(0, 10)}
                       </Typography>
                       <Typography>
                         Created By : <br />
-                        {superAdmin}
+                        {createdBy}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -364,7 +418,6 @@ export default function Template() {
           </Grid>
         </Container>
       </main>
-      {/* Footer */}
       <footer className={classes.footer}>
         <Typography variant="h6" align="center" gutterBottom>
           Hey! Friendly Footer

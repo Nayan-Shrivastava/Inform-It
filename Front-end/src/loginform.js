@@ -6,7 +6,13 @@ import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import axios from "axios";
-import './login.css'
+import "./login.css";
+import TextField from "@material-ui/core/TextField";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
 //import Template from "./template";
 const useStyles = makeStyles((theme) => ({
   icon: {
@@ -39,20 +45,93 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(6),
   },
 }));
-function Loginform(props) {
+export default function Loginform(props) {
   const classes = useStyles();
+  //for login form
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [string, setString] = useState("");
   const history = useHistory();
+  //for signup form
+  const [open, setOpen] = useState("");
+  const [regName, setRegName] = useState("");
+  const [regUserName, setRegUserName] = useState("");
+  const [email, setEmail] = useState("");
+  const [regPassword, setRegPassword] = useState("");
+  const [age, setAge] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [invalidMessage, setInvalidMessage] = useState("");
+  const [invalidMobile, setInvalidMobile] = useState("");
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+  const handleOnSignup = () => {
+    history.push({ pathname: "/login" });
+  };
   const handleOnError = (string) => {
     setString(string);
   };
-
+  const handleOnCancel = () => {
+    setOpen(false);
+    setInvalidMessage("");
+    setInvalidMobile("");
+    setRegName("");
+    setRegUserName("");
+    setRegPassword("");
+    setAge("");
+    setMobileNumber("");
+  };
   const handleOnLogin = () => history.push({ pathname: "/" });
-  const handleOnSignup = () => history.push({ pathname: "/signupform" });
-  const signupHandler = (e) => {
-    handleOnSignup();
+
+  const registerHandler = (e) => {
+    e.preventDefault();
+    const ob = {
+      name: regName,
+      username: regUserName,
+      email: email,
+      password: regPassword,
+      age: age,
+      mobile_number: mobileNumber,
+    };
+    //console.log(ob);
+    if (
+      regName === "" ||
+      regUserName === "" ||
+      regPassword === "" ||
+      email === ""
+    ) {
+      setInvalidMessage("Please fill out all the required fields");
+    } else {
+      setInvalidMessage("");
+    }
+    if (mobileNumber.length !== 10 && mobileNumber.length !== 0) {
+      setInvalidMobile("Please enter a valid mobile number");
+    } else {
+      setInvalidMobile("");
+      axios
+        .post("http://localhost:8000/api/users/create_user/", ob)
+        .then(function (response) {
+          // handle success
+          if ("error" in response.data) {
+          } else {
+            console.log(response);
+            handleOnSignup();
+
+            setOpen(false);
+            setInvalidMessage("");
+            setInvalidMobile("");
+            setRegName("");
+            setRegUserName("");
+            setRegPassword("");
+            setAge("");
+            setMobileNumber("");
+          }
+        })
+        .catch(function (error) {
+          // handle error
+          console.log(error);
+        });
+    }
   };
   const loginHandler = (e) => {
     e.preventDefault();
@@ -64,13 +143,14 @@ function Loginform(props) {
       .then(function (response) {
         // handle success
         if ("error" in response.data) {
-          // console.log(response);
+          //console.log("if ",response);
           const string = response.data.error;
           console.log("string ", string);
           handleOnError(string);
         } else {
-          //console.log(response);
-          localStorage.setItem('token',response.data.token)
+          // console.log("else ",response);
+          localStorage.setItem("token", response.data.token);
+          // console.log("token ", localStorage.getItem("token"));
           handleOnLogin();
         }
       })
@@ -122,7 +202,7 @@ function Loginform(props) {
           />
           <br></br>
           <br></br>
-          {string !== undefined && <p>{string}</p>}
+          {string !== undefined && <p style={{ color: "red" }}>{string}</p>}
           <br />
           <br />
           <Button
@@ -139,14 +219,115 @@ function Loginform(props) {
             variant="outlined"
             color="primary"
             style={{ height: "8%", width: "25%", marginLeft: "3%" }}
-            onClick={signupHandler}
+            onClick={handleClickOpen}
           >
             SignUp
           </Button>
+          <Dialog
+            open={open}
+            onClose={registerHandler}
+            fullWidth
+            aria-labelledby="form-dialog-title"
+          >
+            <DialogTitle id="form-dialog-title">Signup Form : </DialogTitle>
+            <DialogContent>
+              <DialogContentText>Enter Your Details : </DialogContentText>
+              <TextField
+                autoFocus
+                variant="outlined"
+                margin="dense"
+                id="Name"
+                label="Name"
+                type="text"
+                fullWidth
+                required
+                onChange={(e) => setRegName(e.target.value)}
+              />
+
+              <TextField
+                variant="outlined"
+                autoFocus
+                margin="dense"
+                id="regUserName"
+                label="Username"
+                type="text"
+                fullWidth
+                required
+                onChange={(e) => setRegUserName(e.target.value)}
+              />
+
+              <TextField
+                variant="outlined"
+                autoFocus
+                margin="dense"
+                id="regPassword"
+                label="Password"
+                type="password"
+                fullWidth
+                required
+                onChange={(e) => setRegPassword(e.target.value)}
+              />
+
+              <TextField
+                variant="outlined"
+                autoFocus
+                margin="dense"
+                id="email"
+                label="Email"
+                type="email"
+                fullWidth
+                required
+                onChange={(e) => setEmail(e.target.value)}
+              />
+
+              <TextField
+                variant="outlined"
+                autoFocus
+                margin="dense"
+                id="age"
+                label="Age"
+                type="text"
+                fullWidth
+                onChange={(e) => setAge(e.target.value)}
+              />
+              <TextField
+                variant="outlined"
+                autoFocus
+                margin="dense"
+                id="mobileNumber"
+                label="Mobile Number"
+                type="text"
+                fullWidth
+                onChange={(e) => setMobileNumber(e.target.value)}
+              />
+              {invalidMobile !== undefined && (
+                <p style={{ color: "red" }}>{invalidMobile}</p>
+              )}
+              {invalidMessage !== undefined && (
+                <p style={{ color: "red" }}>{invalidMessage}</p>
+              )}
+            </DialogContent>
+            <br />
+            <br />
+            <DialogActions>
+              <Button
+                onClick={handleOnCancel}
+                color="primary"
+                variant="outlined"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={registerHandler}
+                color="primary"
+                variant="contained"
+              >
+                Register
+              </Button>
+            </DialogActions>
+          </Dialog>
         </div>
       </div>
     </form>
   );
 }
-
-export default Loginform;

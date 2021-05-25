@@ -3,7 +3,8 @@ import Login from "./login";
 import { Switch, Route} from "react-router-dom";
 import { BrowserRouter as Router } from 'react-router-dom';
 import Template from "./template";
-import Signupform from "./signupform";
+import Section from "./section";
+import Notice from "./notice";
 
 function App() {
   return (
@@ -15,8 +16,11 @@ function App() {
         <Route path="/login">
           <Login />
         </Route>
-        <Route path="/signupform">
-          <Signupform />
+        <Route path="/section">
+          <Section />
+        </Route>
+        <Route path="/notice">
+          <Notice />
         </Route>
       </Switch>
     </Router>
