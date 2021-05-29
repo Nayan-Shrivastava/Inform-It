@@ -1,37 +1,47 @@
 const mongoose = require("mongoose");
 
-const UserSchema = new mongoose.Schema({
-	name : {
+const NoticeSchema = new mongoose.Schema({
+	by : {
 		type : String,
-		require : true,
+		require : false,
 		default : null,
 	},
-	username : {
+	createdBy : {
 		type:String,
 		require: true,
-		default:null,
-		unique:true
+		default:null
 	}, 
-	email : {
+	heading : {
 		type:String,
-		lowercase:true,
-
 		require:true,
-		max:70,
-		unique:true,
+		max:100,
+		min :1,
 	},
-	age:{
+	subHeading : {
+		type:String,
+		default: "",
+		max:150,
+		min : 1,
+	},
+	priority:{
 		type:Number,
+		default : 2,
+	},
+	body:{
+		type: String,
+		required: true,
+		max: 3000,
 		default : null,
 	},
-	password:{
-		type:String,
-		required:true,
-		min:6
-	},
-	batchesId:{type:Array,default:[]},
-	mobile_number:{type:String,minlength:10,default : null,} 
-}
+	deadline:{type:Date,default:null},
+	impLinks:{type:Array,default:[]},
+	sectionId:{ type : String, required : true}
+},
+{ timestamps: true}
 );
 
-module.exports = mongoose.model("User",UserSchema);
+module.exports = mongoose.model("Notice",NoticeSchema);
+
+
+
+
