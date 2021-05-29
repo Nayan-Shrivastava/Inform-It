@@ -21,42 +21,50 @@ const addSectionIdtoBatch = (sectionId,batchId) => {
 
 
 // Create a Section under given Batch
-router.post("/create_section/", async (req,res) => {
+router.post("/create-section/",verifyToken, async (req,res) => {
     verifyUser(req,res,(authData) => {
         userId = authData._id;   
     });    
         //const userId = req.body.userid; //user id
-        const batchId = req.body.batchid; //user id
-        const batch = await Batch.findById(batchId);
-        if(!batch){
-        	res.status(404).json("batch not found");
-        }else{
-        	if(batch.adminId.includes(userId) || batch.superAdmin === userId){
-        		try{
-        			const newSection = new Section({
-        				name : req.body.name,
-        				description : req.body.description,
-        				batchId : req.body.batchid
-        			});
+        const batchId = req.body.batchId; //user id
+        try{
+            const batch = await Batch.findById(batchId);
+            if(!batch){
+                res.status(200).json( { error : "batch not found"} );
+            }else{
+                //if(batch.adminId.includes(userId) || batch.superAdmin === userId){
+                    try{
+                        const newSection = new Section({
+                            name : req.body.name,
+                            description : req.body.description,
+                            batchId : req.body.batchId
+                        });
 
-    		        // Save Batch and response
-    		        await newSection.save().then((section) => {
-    		        	console.log(section._id,section.batchId);
-    		        	addSectionIdtoBatch(section._id,section.batchId);
-    		        	res.status(200).json(section);
-    		        }).catch((err) => {
-    		        	res.status(500).json(err);
-    		        });
+                        // Save section and response
+                        await newSection.save().then((section) => {
+                            console.log(section._id,section.batchId);
+                            addSectionIdtoBatch(section._id,section.batchId);
+                            res.status(200).json(section);
+                        }).catch((err) => {
+                            res.status(500).json(err);
+                        });
 
-    		    }catch(err){
-    		    	res.status(500).json(err);
+                    }catch(err){
+                        res.status(500).json(err);
 
-    		    };
-
-    		}else{
-    			res.status(400).json("user is not admin");
-    		}
-    	}
+                    };
+    /*
+                }else{
+                    res.status(400).json("user is not admin");
+                }
+    */
+            }
+    }catch(err){
+        console.log(err)
+        res.status(200).json({
+            error : "batch not found"
+        });
+    }
 });
 
 // Get batch object with all it's sections
@@ -95,7 +103,7 @@ router.post("/get-all-sections",verifyToken, async(req,res) => {
         })
         .catch((err) => {
             console.log(err);
-            res.status(404).json("Batch not found");
+            res.status(200).json({"error": "Batch not found"});
     	}); 
     });  
 });
