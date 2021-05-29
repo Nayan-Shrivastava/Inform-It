@@ -40,7 +40,6 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
     display: "flex",
     flexDirection: "column",
-    
   },
   cardMedia: {
     paddingTop: "56.25%", // 16:9
@@ -324,7 +323,14 @@ export default function Template() {
           {/* End hero unit */}
           <Grid container spacing={4}>
             {cards.map(
-              ({ index, name, description, createdAt, superAdmin, _id }) => (
+              ({
+                index,
+                name,
+                description,
+                createdAt,
+                superAdminName,
+                _id,
+              }) => (
                 <Grid item key={index} xs={12} sm={6} md={4}>
                   <Card
                     className={classes.index}
@@ -342,7 +348,7 @@ export default function Template() {
                       <Typography gutterBottom variant="h5" component="h2">
                         {name}
                       </Typography>
-                      <Typography >
+                      <Typography>
                         {description.length > 100 &&
                           `${description.substring(0, 100)}...`}
 
@@ -352,9 +358,10 @@ export default function Template() {
                       <Typography>
                         Created On : {createdAt.slice(0, 10)}
                       </Typography>
+                      <Typography>Created By : {superAdminName}</Typography>
                       <Typography>
-                        Created By : <br />
-                        {superAdmin}
+                        Batch Id : <br />
+                        {_id}
                       </Typography>
                     </CardContent>
                   </Card>

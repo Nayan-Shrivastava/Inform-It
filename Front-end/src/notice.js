@@ -10,6 +10,7 @@ import CardContent from "@material-ui/core/CardContent";
 import CardMedia from "@material-ui/core/CardMedia";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Grid from "@material-ui/core/Grid";
+import Link from "@material-ui/core/Link";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
@@ -21,8 +22,12 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import "./index.css";
-import ReactQuill, { Quill } from "react-quill";
+import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import Select from "@material-ui/core/Select";
+import InputLabel from "@material-ui/core/InputLabel";
+import FormControl from "@material-ui/core/FormControl";
+import Chip from "@material-ui/core/Chip";
 
 const useStyles = makeStyles((theme) => ({
   icon: {
@@ -55,13 +60,12 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(6),
   },
 }));
-const images = ["p1.png"];
+const images = ["notice.png"];
 export default function Section(props) {
   const modules = {
     toolbar: {
-      
       container: [
-        [ "image"],
+        ["image"],
         [{ header: "1" }, { header: "2" }, { font: [] }],
         [{ size: [] }],
         ["bold", "italic", "underline", "strike", "blockquote"],
@@ -104,10 +108,43 @@ export default function Section(props) {
   const [priority, setPriority] = useState("");
   const [impLinks, setImpLinks] = useState("");
   const [deadline, setDeadline] = useState("");
+  const [open2, setOpen2] = useState(false);
+  const [popBody, setPopBody] = useState("");
+  const [popHeading, setPopHeading] = useState("");
+  const [popSubheading, setPopSubheading] = useState("");
+  const [popPriority, setPopPriority] = useState("");
+  const [popBy, setPopBy] = useState("");
+  const [popLink, setPopLink] = useState([]);
+  const [popDead, setPopDead] = useState("");
+  // const preventDefault = (event) => event.preventDefault();
+  function handlePop(body, heading, subHeading, priority, link, dead, by) {
+    setPopBody(body);
+    setPopHeading(heading);
+    setPopSubheading(subHeading);
+    if (priority === 1) {
+      setPopPriority("Low");
+    }
+    if (priority === 2) {
+      setPopPriority("Moderate");
+    }
+    if (priority === 3) {
+      setPopPriority("High");
+    }
+    if (priority === 4) {
+      setPopPriority("Very High");
+    }
 
-  function handleOnCard(id) {
-    console.log(id);
+    setPopBy(by);
+    setPopLink(link);
+    setPopDead(dead);
   }
+  const handleClickOpen2 = () => {
+    setOpen2(true);
+  };
+  const handleOnClose2 = () => {
+    setOpen2(false);
+  };
+
   const handleOnTokenNotFound = () => {
     history.push({ pathname: "/login" });
   };
@@ -128,6 +165,7 @@ export default function Section(props) {
   };
   const handleCancel = () => {
     setOpen(false);
+    setOpen2(false);
     setInvalidMessage("");
     setHeading("");
     setSubHeading("");
@@ -147,11 +185,12 @@ export default function Section(props) {
       impLinks: impLinks,
       deadline: deadline,
       by: by,
+      sectionId: location.state,
     };
     console.log("hi ", ob);
     console.log("body", body);
-    if (heading === "") {
-      setInvalidMessage("*Please fill out this field");
+    if (heading === "" || body === "") {
+      setInvalidMessage("*Please fill out all the required fields");
     } else {
       axios
         .post(
@@ -165,7 +204,7 @@ export default function Section(props) {
           console.log("sahi h", response.data);
           setInvalidMessage("");
           setOpen(false);
-          //window.location.reload(false);
+          window.location.reload(false);
         })
         .catch(function (error) {
           // handle error
@@ -267,9 +306,6 @@ export default function Section(props) {
                         required
                         onChange={(e) => setHeading(e.target.value)}
                       />
-                      {/* {invalidMessage !== undefined && (
-                        <p style={{ color: "red" }}>{invalidMessage}</p>
-                      )} */}
                       <TextField
                         autoFocus
                         margin="dense"
@@ -278,28 +314,21 @@ export default function Section(props) {
                         type="text"
                         variant="outlined"
                         fullWidth
-                        required
                         onChange={(e) => setSubHeading(e.target.value)}
                       />
-                      {/* <TextField
-                        autoFocus
-                        multiline="true"
-                        margin="dense"
-                        id="body"
-                        label="Body"
-                        type="text"
-                        fullWidth
-                        onChange={(e) => setBody(e.target.value)}
-                      /> */}
+                      <br />
+
                       <ReactQuill
                         value={body}
                         theme="snow"
-                        placeholder = "Body..."
+                        placeholder="Body*"
                         modules={modules}
+                        required
+                        style={{ marginTop: "3px" }}
                         format={formats}
                         onChange={(content) => setBody(content)}
                       />
-                      <br />
+
                       <TextField
                         autoFocus
                         margin="dense"
@@ -308,20 +337,39 @@ export default function Section(props) {
                         type="text"
                         variant="outlined"
                         fullWidth
-                        required
                         onChange={(e) => setBy(e.target.value)}
                       />
-                      <TextField
-                        autoFocus
-                        margin="dense"
-                        id="priority"
-                        label="Priority"
+
+                      <FormControl
                         variant="outlined"
-                        type="text"
+                        className={classes.formControl}
                         fullWidth
-                        required
-                        onChange={(e) => setPriority(e.target.value)}
-                      />
+                        style={{ marginTop: "3px" }}
+                      >
+                        <InputLabel htmlFor="outlined-age-native-simple">
+                          Priority
+                        </InputLabel>
+                        <Select
+                          native
+                          label="Priority"
+                          inputProps={{
+                            name: "Priority",
+                            id: "outlined-age-native-simple",
+                          }}
+                          value={priority}
+                          variant="outlined"
+                          autoFocus
+                          margin="dense"
+                          id="priority"
+                          onChange={(e) => setPriority(e.target.value)}
+                        >
+                          <option value="" disabled></option>
+                          <option value={1}>Low</option>
+                          <option value={2}>Moderate</option>
+                          <option value={3}>High</option>
+                          <option value={4}>Very High</option>
+                        </Select>
+                      </FormControl>
                       <TextField
                         autoFocus
                         margin="dense"
@@ -330,7 +378,6 @@ export default function Section(props) {
                         type="text"
                         variant="outlined"
                         fullWidth
-                        required
                         onChange={(e) => setImpLinks(e.target.value)}
                       />
                       <TextField
@@ -338,12 +385,17 @@ export default function Section(props) {
                         margin="dense"
                         id="deadline"
                         label="Deadline"
-                        type="text"
-                        fullWidth
                         variant="outlined"
-                        required
+                        type="Date"
+                        fullWidth
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
                         onChange={(e) => setDeadline(e.target.value)}
                       />
+                      {invalidMessage !== undefined && (
+                        <p style={{ color: "red" }}>{invalidMessage}</p>
+                      )}
                     </DialogContent>
                     <DialogActions>
                       <Button onClick={handleCancel} color="primary">
@@ -359,6 +411,57 @@ export default function Section(props) {
             </div>
           </Container>
         </div>
+        <Dialog
+          open={open2}
+          onClose={handleOnClose2}
+          fullWidth
+          aria-labelledby="form-dialog-title"
+        >
+          <DialogTitle id="form-dialog-title" style={{ textAlign: "center" }}>
+            <h4 style= {{fontFamily:"cursive"}}>{popHeading}</h4>
+
+            <h5 style={{ textAlign: "center" }}>{popSubheading}</h5>
+          </DialogTitle>
+          <DialogContent>
+            <Typography>Deadline: </Typography>
+            <Typography>
+              {popDead !== null && (
+                <Chip label={popDead.slice(0, 10)} color="secondary" />
+              )}
+            </Typography>
+            <Typography>Priority : {popPriority}</Typography>
+
+            <ReactQuill
+              value={popBody}
+              readOnly={true}
+              theme={"bubble"}
+              style={{ marginLeft: " 10%" }}
+            />
+            <Typography> Notice By: {popBy}</Typography>
+
+            <Typography>
+              {popLink !== null && popLink.length !== 0 && `Important Links: `}
+              {popLink !== null &&
+                popLink.length !== 0 &&
+                popLink.map((pop) => (
+                  <Typography>
+                    <Link to={pop}>{pop}</Link>
+
+                    <br />
+                  </Typography>
+                ))}
+            </Typography>
+
+            {/* <Typography>
+              {popDead !== null && `Deadline: ${popDead.slice(0, 10)}`}
+            </Typography> */}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleOnClose2} color="primary">
+              Ok
+            </Button>
+          </DialogActions>
+        </Dialog>
         <Container className={classes.cardGrid} maxWidth="md">
           {/* End hero unit */}
           <Grid container spacing={4}>
@@ -366,6 +469,9 @@ export default function Section(props) {
               ({
                 index,
                 heading,
+                body,
+                by,
+                subHeading,
                 createdAt,
                 createdBy,
                 priority,
@@ -378,7 +484,16 @@ export default function Section(props) {
                     className={classes.index}
                     style={{ minHeight: "450px", maxHeight: "450px" }}
                     onClick={() => {
-                      handleOnCard(_id);
+                      handleClickOpen2();
+                      handlePop(
+                        body,
+                        heading,
+                        subHeading,
+                        priority,
+                        impLinks,
+                        deadline,
+                        by
+                      );
                     }}
                   >
                     <CardMedia
@@ -390,19 +505,33 @@ export default function Section(props) {
                       <Typography gutterBottom variant="h5" component="h2">
                         {heading}
                       </Typography>
-                      <Typography>{deadline}</Typography>
+                      <Typography>
+                        {deadline != null && (
+                          <h5>Deadline: {deadline.slice(0, 10)}</h5>
+                        )}
+                      </Typography>
 
-                      <Typography>{impLinks}</Typography>
-                      <br />
-                      <Typography>{priority}</Typography>
+                      <Typography>
+                        {impLinks !== null &&
+                          impLinks.length !== 0 &&
+                          `Important Links: `}
+                        {impLinks !== null &&
+                          impLinks.length !== 0 &&
+                          impLinks.map((imp) => (
+                            <Typography>
+                              <Link to={imp}>{imp}</Link>
 
-                      {/* <Typography>
-                        {/* {description.length > 100 &&
-                          `${description.substring(0, 100)}...`}
+                              <br />
+                            </Typography>
+                          ))}
+                      </Typography>
 
-                        {description.length <= 100 && `${description}`} 
-                      </Typography> */}
-                      <br />
+                      <Typography>
+                        {(priority === 1 && `Priority: Low`) ||
+                          (priority === 2 && `Priority: Moderate`) ||
+                          (priority === 3 && `Priority: High`) ||
+                          (priority === 4 && `Priority: Very High`)}
+                      </Typography>
                       <Typography>
                         Created On : {createdAt.slice(0, 10)}
                       </Typography>

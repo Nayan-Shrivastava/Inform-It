@@ -1,3 +1,4 @@
+import validator from "validator";
 import FormLabel from "@material-ui/core/FormLabel";
 import Input from "@material-ui/core/Input";
 import { useState } from "react";
@@ -62,6 +63,9 @@ export default function Loginform(props) {
   const [mobileNumber, setMobileNumber] = useState("");
   const [invalidMessage, setInvalidMessage] = useState("");
   const [invalidMobile, setInvalidMobile] = useState("");
+  const [invalidEmail, setInvalidEmail] = useState("");
+  const [invalidName, setInvalidName] = useState("");
+
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -80,6 +84,8 @@ export default function Loginform(props) {
     setRegPassword("");
     setAge("");
     setMobileNumber("");
+    setInvalidEmail("");
+    setInvalidName("");
   };
   const handleOnLogin = () => history.push({ pathname: "/" });
 
@@ -93,6 +99,7 @@ export default function Loginform(props) {
       age: age,
       mobile_number: mobileNumber,
     };
+
     //console.log(ob);
     if (
       regName === "" ||
@@ -101,38 +108,57 @@ export default function Loginform(props) {
       email === ""
     ) {
       setInvalidMessage("Please fill out all the required fields");
-    } else {
+    } 
+    else {
       setInvalidMessage("");
-    }
-    if (mobileNumber.length !== 10 && mobileNumber.length !== 0) {
-      setInvalidMobile("Please enter a valid mobile number");
-    } else {
-      setInvalidMobile("");
-      axios
-        .post("http://localhost:8000/api/users/create_user/", ob)
-        .then(function (response) {
-          // handle success
-          if ("error" in response.data) {
-          } else {
-            console.log(response);
-            handleOnSignup();
-
-            setOpen(false);
-            setInvalidMessage("");
-            setInvalidMobile("");
-            setRegName("");
-            setRegUserName("");
-            setRegPassword("");
-            setAge("");
-            setMobileNumber("");
-          }
-        })
-        .catch(function (error) {
-          // handle error
-          console.log(error);
-        });
-    }
-  };
+      if (mobileNumber.length !== 10 && mobileNumber.length !== 0) {
+        setInvalidMobile("Please enter a valid mobile number");
+      } else {
+        setInvalidMobile("");
+        axios
+          .post("http://localhost:8000/api/users/create_user/", ob)
+          .then(function (response) {
+            // handle success
+            if ("error" in response.data) {
+              if (response.data.error === "email exists") {
+                setInvalidEmail(
+                  `An account with Email  already exists.\nPlease try a different Email Address`
+                );
+              } else {
+                setInvalidEmail("");
+               
+                if (response.data.error === "username exists") {
+                  setInvalidName(
+                    `An account with Username  already exists.\nPlease try a different Username.`
+                  );
+                }
+                else{
+                  setInvalidName("")
+                } 
+              }
+            }
+              else {
+              console.log(response);
+              handleOnSignup();
+              setOpen(false);
+              setInvalidMessage("");
+              setInvalidMobile("");
+              setRegName("");
+              setRegUserName("");
+              setRegPassword("");
+              setAge("");
+              setMobileNumber("");
+              setInvalidEmail("");
+              setInvalidName("");
+              }
+              })
+          .catch(function (error) {
+            // handle error
+            console.log(error);
+          });
+        }
+      }
+    };
   const loginHandler = (e) => {
     e.preventDefault();
     console.log(userName);
@@ -160,6 +186,7 @@ export default function Loginform(props) {
         //console.log("purva");
       });
   };
+
   return (
     <form>
       <div>
@@ -255,6 +282,9 @@ export default function Loginform(props) {
                 required
                 onChange={(e) => setRegUserName(e.target.value)}
               />
+              {invalidName !== undefined && (
+                <p style={{ color: "red" }}>{invalidName}</p>
+              )}
 
               <TextField
                 variant="outlined"
@@ -274,11 +304,14 @@ export default function Loginform(props) {
                 margin="dense"
                 id="email"
                 label="Email"
-                type="email"
+                type="text"
                 fullWidth
                 required
                 onChange={(e) => setEmail(e.target.value)}
               />
+              {invalidEmail !== undefined && (
+                <p style={{ color: "red" }}>{invalidEmail}</p>
+              )}
 
               <TextField
                 variant="outlined"
