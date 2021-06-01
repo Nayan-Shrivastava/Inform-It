@@ -8,11 +8,17 @@ const batchesRoute = require("./routes/batches");
 const usersRoute = require("./routes/users");
 const sectionsRoute = require("./routes/sections");
 
+if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging') {
+  app.use(express.static('client/build'));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname + '/client/build/index.html'));
+  });
+}
 const cors = require('cors');
 app.use(cors())
 
 // Port Number
-const port = 8000;
+const port = process.env.PORT || 8000;
 
 dotenv.config();
 console.log(process.env.MONGO_URL);

@@ -5,6 +5,7 @@ const BatchSchema = new mongoose.Schema({
 	description:{ type: String},
 	numberofPeople:{type:Number},
 	superAdmin:{type:String},
+	superAdminName:{type:String},
 	adminId:{type:Array,default:[]},
 	sectionId:{type:Array,default:[]},
 	peopleId:{type:Array,default:[]}

@@ -10,10 +10,10 @@ router.post("/login", async (req,res) => {
 
     try{
         const user = await User.findOne({username:req.body.username});
-        !user && res.status(404).json({"error" :"user not found"});
+        !user && res.status(200).json({"error" :"user not found"});
 
         const validPassword = await bcrypt.compare(req.body.password, user.password)
-        !validPassword && res.status(400).json({"error" :"wrong password"});
+        !validPassword && res.status(200).json({"error" :"wrong password"});
         console.log(process.env.SECRET_KEY);
         jwt.sign(user.toJSON(),process.env.SECRET_KEY, (err,token) => {
             if(err){
@@ -36,33 +36,51 @@ router.post("/login", async (req,res) => {
 
 router.post("/create_user", async (req,res) => {
 
-	try{
+    try{
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(req.body.password,salt);
-		const newUser = new User({
-			name : req.body.name,
-			username : req.body.username,
-			email : req.body.email,
-			age : req.body.age,
-			password : hashedPassword,
+        if (req.body.mobile_number === ""){
+            req.body.mobile_number = null
+        }
+        if (req.body.age === ""){
+            req.body.age = null
+        }
+        const newUser = new User({
+            name : req.body.name,
+            username : req.body.username,
+            email : req.body.email,
+            age : req.body.age,
+            password : hashedPassword,
             mobile_number : req.body.mobile_number,
-			//batchesId : req.body.batchesId, //"6093c2d48cf4d01e9c62268f"   "6093caecab066b0220147a1c"
-		});
+            //batchesId : req.body.batchesId, //"6093c2d48cf4d01e9c62268f"   "6093caecab066b0220147a1c"
+        });
 
-		// Save Batch and response
-		const user = await newUser.save();
+        // Save Batch and response
+        const user = await newUser.save();
         jwt.sign(user,process.env.SECRET_KEY, (err,token) => {
             res.status(200).json({
                 token,
                 user
             });
         });
-		//res.status(200).json(user);
+        //res.status(200).json(user);
 
-	}catch(err){
-		res.status(500).json(err);
+    }catch(err){
+        console.log(err);
 
-	};
+        if (err.keyPattern.username == 1){
+            res.status(200).json({
+                error : "username exists"
+            });
+        }else if(err.keyPattern.email == 1){
+            res.status(200).json({
+                error : "email exists"
+            });
+        }else{
+        res.status(500).json(err);
+        }
+
+    };
 
 });
 
@@ -80,42 +98,59 @@ const addBatchIdtoUser = (batchId,userId) => {
     });
 }
 
-router.post("/add-batch", async (req,res) => {
+// Add batch to a user
+router.post("/add-batch",verifyToken, async (req,res) => {
     verifyUser(req,res,(authData) => {
-        id = authData._id;   
+        userId = authData._id;   
     });
-    const batch = await Batch.findById(req.body.batchId);
-        !batch && res.status(200).json({
-            error : "batch not found"
-        });
-    addBatchIdtoUser(req.body.batchId,req.body.userId);
 
+    try{
+        const batch = await Batch.findById(req.body.batchId);
+            !batch && res.status(200).json({
+                error : "batch not found"
+            });
+        if (addBatchIdtoUser(req.body.batchId,userId) == true){
+            res.status(200).json({
+                error : "internal error"
+            })
+        }else{
+            res.status(200).json({
+                message : "success"
+            })
+        }
+    }catch{
+        res.status(200).json({
+                error : "batch not found"
+            });
+    }
 });
 
+
 // Create a batch under given user
-router.post("/create_batch/",verifyToken,async (req,res) => {
+// Create a batch under given user
+router.post("/create-batch/",verifyToken,async (req,res) => {
     verifyUser(req,res,(authData) => {
-        id = authData._id;   
+        userId = authData._id;
+        userName = authData.username   
     });
     try{
         const newBatch = new Batch({
             name : req.body.name,
             description : req.body.description,
-            superAdmin : id,
+            superAdmin : userId,
+            superAdminName : userName,
             numberofPeople: 1,
 
         });
-
+        //console.log("newBatch",newBatch);
         // Save Batch and response
         await newBatch.save().then((batch) => {
-            console.log(batch._id,batch.superAdmin);
-            addBatchIdtoUser(batch._id,batch.superAdmin);
+            //console.log("asda",batch._id,batch.superAdmin);
+            addBatchIdtoUser(batch._id,userId);
             res.status(200).json(batch);
         }).catch((err) => {
             res.status(500).json(err);
         });
-        
-        
 
     }catch(err){
         res.status(500).json(err);
@@ -187,7 +222,7 @@ router.post("/get-user", verifyToken,async(req,res) => {
 
 
 
-router.post("/", (req,res) => {
+router.get("/", (req,res) => {
     res.send("Hey it's Users route")
 });
 module.exports = router;
