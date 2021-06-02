@@ -1,0 +1,27 @@
+												HEADING
+											  SUB-HEADING
+
+Important-Dates:
+Deadline:
+
+Body: 
+		{
+			.
+			.
+			.
+			.
+			.
+			.
+			.
+		}
+
+by : 
+
+priority : very-high/high/moderate/low
+
+[
+obj-data:
+		submit-by: (user-id)
+		created-on(auto)
+		modified-on(auto)
+]
