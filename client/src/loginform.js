@@ -13,6 +13,7 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
+import Grid from "@material-ui/core/Grid";
 import DialogTitle from "@material-ui/core/DialogTitle";
 //import Template from "./template";
 const useStyles = makeStyles((theme) => ({
@@ -108,8 +109,7 @@ export default function Loginform(props) {
       email === ""
     ) {
       setInvalidMessage("Please fill out all the required fields");
-    } 
-    else {
+    } else {
       setInvalidMessage("");
       if (mobileNumber.length !== 10 && mobileNumber.length !== 0) {
         setInvalidMobile("Please enter a valid mobile number");
@@ -126,18 +126,16 @@ export default function Loginform(props) {
                 );
               } else {
                 setInvalidEmail("");
-               
+
                 if (response.data.error === "username exists") {
                   setInvalidName(
                     `An account with Username  already exists.\nPlease try a different Username.`
                   );
+                } else {
+                  setInvalidName("");
                 }
-                else{
-                  setInvalidName("")
-                } 
               }
-            }
-              else {
+            } else {
               console.log(response);
               handleOnSignup();
               setOpen(false);
@@ -150,15 +148,15 @@ export default function Loginform(props) {
               setMobileNumber("");
               setInvalidEmail("");
               setInvalidName("");
-              }
-              })
+            }
+          })
           .catch(function (error) {
             // handle error
             console.log(error);
           });
-        }
       }
-    };
+    }
+  };
   const loginHandler = (e) => {
     e.preventDefault();
     console.log(userName);
@@ -189,21 +187,19 @@ export default function Loginform(props) {
 
   return (
     <form>
-      <div>
-        <div
-          style={{
-            marginRight: "10%",
-            marginLeft: "70%",
-            marginBottom: "80%",
-            marginTop: "55%",
-            width: "100%",
-          }}
+      <Grid>
+        <Grid
+          item
         >
           <FormLabel for="userName">
             <b>Username : </b>
           </FormLabel>
           <Input
-            style={{ borderStyle: "inset", borderRadius: "12px" }}
+            style={{
+              borderStyle: "inset",
+              borderRadius: "12px",
+              marginLeft: "10px",
+            }}
             color="secondary"
             type="text"
             id="userName"
@@ -218,7 +214,11 @@ export default function Loginform(props) {
             <b>Password : </b>
           </FormLabel>
           <Input
-            style={{ borderStyle: "inset", borderRadius: "12px" }}
+            style={{
+              borderStyle: "inset",
+              borderRadius: "12px",
+              marginLeft: "10px",
+            }}
             color="secondary"
             type="password"
             id="password"
@@ -227,16 +227,18 @@ export default function Loginform(props) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <br></br>
-          <br></br>
+          <br/>
+          
           {string !== undefined && <p style={{ color: "red" }}>{string}</p>}
           <br />
-          <br />
+         
+        </Grid>
+        <Grid item>
           <Button
             className={classes.heroButtons}
             variant="contained"
             color="primary"
-            style={{ height: "8%", width: "25%", marginLeft: "32%" }}
+            style={{ height: "8%", width: "25%", marginLeft: "25%" }}
             onClick={loginHandler}
           >
             Login
@@ -250,117 +252,113 @@ export default function Loginform(props) {
           >
             SignUp
           </Button>
-          <Dialog
-            open={open}
-            onClose={registerHandler}
-            fullWidth
-            aria-labelledby="form-dialog-title"
-          >
-            <DialogTitle id="form-dialog-title">Signup Form : </DialogTitle>
-            <DialogContent>
-              <DialogContentText>Enter Your Details : </DialogContentText>
-              <TextField
-                autoFocus
-                variant="outlined"
-                margin="dense"
-                id="Name"
-                label="Name"
-                type="text"
-                fullWidth
-                required
-                onChange={(e) => setRegName(e.target.value)}
-              />
+        </Grid>
+        <Dialog
+          open={open}
+          onClose={registerHandler}
+          fullWidth
+          aria-labelledby="form-dialog-title"
+        >
+          <DialogTitle id="form-dialog-title">Signup Form : </DialogTitle>
+          <DialogContent>
+            <DialogContentText>Enter Your Details : </DialogContentText>
+            <TextField
+              autoFocus
+              variant="outlined"
+              margin="dense"
+              id="Name"
+              label="Name"
+              type="text"
+              fullWidth
+              required
+              onChange={(e) => setRegName(e.target.value)}
+            />
 
-              <TextField
-                variant="outlined"
-                autoFocus
-                margin="dense"
-                id="regUserName"
-                label="Username"
-                type="text"
-                fullWidth
-                required
-                onChange={(e) => setRegUserName(e.target.value)}
-              />
-              {invalidName !== undefined && (
-                <p style={{ color: "red" }}>{invalidName}</p>
-              )}
+            <TextField
+              variant="outlined"
+              autoFocus
+              margin="dense"
+              id="regUserName"
+              label="Username"
+              type="text"
+              fullWidth
+              required
+              onChange={(e) => setRegUserName(e.target.value)}
+            />
+            {invalidName !== undefined && (
+              <p style={{ color: "red" }}>{invalidName}</p>
+            )}
 
-              <TextField
-                variant="outlined"
-                autoFocus
-                margin="dense"
-                id="regPassword"
-                label="Password"
-                type="password"
-                fullWidth
-                required
-                onChange={(e) => setRegPassword(e.target.value)}
-              />
+            <TextField
+              variant="outlined"
+              autoFocus
+              margin="dense"
+              id="regPassword"
+              label="Password"
+              type="password"
+              fullWidth
+              required
+              onChange={(e) => setRegPassword(e.target.value)}
+            />
 
-              <TextField
-                variant="outlined"
-                autoFocus
-                margin="dense"
-                id="email"
-                label="Email"
-                type="text"
-                fullWidth
-                required
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              {invalidEmail !== undefined && (
-                <p style={{ color: "red" }}>{invalidEmail}</p>
-              )}
+            <TextField
+              variant="outlined"
+              autoFocus
+              margin="dense"
+              id="email"
+              label="Email"
+              type="text"
+              fullWidth
+              required
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            {invalidEmail !== undefined && (
+              <p style={{ color: "red" }}>{invalidEmail}</p>
+            )}
 
-              <TextField
-                variant="outlined"
-                autoFocus
-                margin="dense"
-                id="age"
-                label="Age"
-                type="text"
-                fullWidth
-                onChange={(e) => setAge(e.target.value)}
-              />
-              <TextField
-                variant="outlined"
-                autoFocus
-                margin="dense"
-                id="mobileNumber"
-                label="Mobile Number"
-                type="text"
-                fullWidth
-                onChange={(e) => setMobileNumber(e.target.value)}
-              />
-              {invalidMobile !== undefined && (
-                <p style={{ color: "red" }}>{invalidMobile}</p>
-              )}
-              {invalidMessage !== undefined && (
-                <p style={{ color: "red" }}>{invalidMessage}</p>
-              )}
-            </DialogContent>
-            <br />
-            <br />
-            <DialogActions>
-              <Button
-                onClick={handleOnCancel}
-                color="primary"
-                variant="outlined"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={registerHandler}
-                color="primary"
-                variant="contained"
-              >
-                Register
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </div>
-      </div>
+            <TextField
+              variant="outlined"
+              autoFocus
+              margin="dense"
+              id="age"
+              label="Age"
+              type="text"
+              fullWidth
+              onChange={(e) => setAge(e.target.value)}
+            />
+            <TextField
+              variant="outlined"
+              autoFocus
+              margin="dense"
+              id="mobileNumber"
+              label="Mobile Number"
+              type="text"
+              fullWidth
+              onChange={(e) => setMobileNumber(e.target.value)}
+            />
+            {invalidMobile !== undefined && (
+              <p style={{ color: "red" }}>{invalidMobile}</p>
+            )}
+            {invalidMessage !== undefined && (
+              <p style={{ color: "red" }}>{invalidMessage}</p>
+            )}
+          </DialogContent>
+          <br />
+          <br />
+          <DialogActions>
+            <Button onClick={handleOnCancel} color="primary" variant="outlined">
+              Cancel
+            </Button>
+            <Button
+              onClick={registerHandler}
+              color="primary"
+              variant="contained"
+            >
+              Register
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Grid>
     </form>
   );
 }

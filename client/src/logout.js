@@ -14,16 +14,18 @@ export default function Logout() {
       <Button
         variant="contained"
         color="primary"
+        //display = "float"
+        size="small"
+        //position = "absolute"
         onClick={handleOnClick}
         style={{
-          marginLeft: "85%",
           border: "1px solid white",
           textTransform: "unset",
-        fontSize: "16px",
-        
+          marginTop:"10px",
+          marginRight:"15px",
+          fontSize: "16px",
           
         }}
-
       >
         Logout
       </Button>

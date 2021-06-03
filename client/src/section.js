@@ -150,13 +150,19 @@ export default function Section(props) {
     <React.Fragment>
       <CssBaseline />
       <AppBar position="relative">
-        <Toolbar>
-          <AnnouncementIcon className={classes.icon} />
-          <Typography variant="h6" color="inherit" noWrap>
-            Inform-it
-          </Typography>
-          <Logout />
-        </Toolbar>
+        <Grid container spacing={2} justify="space-between">
+          <Grid item>
+            <Toolbar>
+              <AnnouncementIcon className={classes.icon} />
+              <Typography variant="h6" color="inherit">
+                Inform-it
+              </Typography>
+            </Toolbar>
+          </Grid>
+          <Grid item>
+            <Logout />
+          </Grid>
+        </Grid>
       </AppBar>
       <main>
         {/* Hero unit */}

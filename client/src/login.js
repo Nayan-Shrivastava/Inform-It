@@ -8,6 +8,7 @@ import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Loginform from "./loginform";
 import "./login.css";
+import { Grid } from "@material-ui/core";
 const useStyles = makeStyles((theme) => ({
   icon: {
     marginRight: theme.spacing(2),
@@ -42,8 +43,6 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Login() {
   const classes = useStyles();
-  
-  
   return (
     <React.Fragment>
       <CssBaseline />
@@ -56,15 +55,25 @@ export default function Login() {
         </Toolbar>
       </AppBar>
       <main>
-        <Box className={"outerContainer"} display="flex">
-          <div className={"imageDiv"}>
-            <img src="./../assets/images/login.png" alt="study"></img>
-          </div>
-          <Loginform />
-        </Box>
+        <Grid container spacing={2} justify="space-evenly">
+          <Grid item style={{ marginTop: "5%" }}>
+            <img
+              src="./../assets/images/login.png"
+              alt="study"
+              style={{ maxWidth: "100%" }}
+            ></img>
+          </Grid>
+          <Grid
+            style={{
+              marginTop: "15%",
+            }}
+          >
+            <Loginform />
+          </Grid>
+        </Grid>
       </main>
       {/* Footer */}
-      <footer className={classes.footer}>
+      <footer className={classes.footer} style={{ marginTop: "20%" }}>
         <Typography variant="h6" align="center" gutterBottom>
           Hey! Friendly Footer
         </Typography>
