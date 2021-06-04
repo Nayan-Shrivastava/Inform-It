@@ -1,7 +1,6 @@
 import React from "react";
 import AppBar from "@material-ui/core/AppBar";
 import AnnouncementIcon from "@material-ui/icons/Announcement";
-import Box from "@material-ui/core/Box";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
@@ -11,7 +10,9 @@ import "./login.css";
 import { Grid } from "@material-ui/core";
 const useStyles = makeStyles((theme) => ({
   icon: {
-    marginRight: theme.spacing(2),
+     marginRight: theme.spacing(2),
+    //marginLeft: -15,
+    maxWidth: 35,
   },
   heroContent: {
     backgroundColor: theme.palette.background.paper,
@@ -48,7 +49,12 @@ export default function Login() {
       <CssBaseline />
       <AppBar position="relative">
         <Toolbar>
-          <AnnouncementIcon className={classes.icon} />
+          <img
+            src="./../assets/images/logo.png"
+            alt="logo"
+            className={classes.icon}
+          />
+          {/* <AnnouncementIcon className={classes.icon} /> */}
           <Typography variant="h6" color="inherit" noWrap>
             Inform-it
           </Typography>

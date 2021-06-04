@@ -24,6 +24,8 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 const useStyles = makeStyles((theme) => ({
   icon: {
     marginRight: theme.spacing(2),
+    //marginLeft: -15,
+    maxWidth:35,
   },
   heroContent: {
     backgroundColor: theme.palette.background.paper,
@@ -189,8 +191,14 @@ export default function Template() {
       <AppBar position="relative">
         <Grid container spacing={2} justify="space-between">
           <Grid item>
-            <Toolbar>
-              <AnnouncementIcon className={classes.icon} />
+  
+              {/* <AnnouncementIcon className={classes.icon} /> */}
+              <Toolbar>
+                <img
+                  src="./../assets/images/logo.png"
+                  alt="logo"
+                  className={classes.icon}
+                />
               <Typography variant="h6" color="inherit">
                 Inform-it
               </Typography>

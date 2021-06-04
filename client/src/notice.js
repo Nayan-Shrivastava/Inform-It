@@ -32,6 +32,8 @@ import Chip from "@material-ui/core/Chip";
 const useStyles = makeStyles((theme) => ({
   icon: {
     marginRight: theme.spacing(2),
+    //marginLeft: -15,
+    maxWidth: 35,
   },
   heroContent: {
     backgroundColor: theme.palette.background.paper,
@@ -246,7 +248,12 @@ export default function Section(props) {
         <Grid container spacing={2} justify="space-between">
           <Grid item>
             <Toolbar>
-              <AnnouncementIcon className={classes.icon} />
+              <img
+                src="./../assets/images/logo.png"
+                alt="logo"
+                className={classes.icon}
+              />
+              {/* <AnnouncementIcon className={classes.icon} /> */}
               <Typography variant="h6" color="inherit">
                 Inform-it
               </Typography>
