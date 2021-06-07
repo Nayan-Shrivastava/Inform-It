@@ -178,7 +178,8 @@ router.post("/get-all-batches",verifyToken, async(req,res) => {
         	
         		Batch.findById(x)
                 .then((b) => {
-        		arrbatches.push(JSON.parse(JSON.stringify(b)));
+                    if(b!==null){
+        		arrbatches.push(JSON.parse(JSON.stringify(b)));}
         		//console.log(b);
                 i += 1;
                 if(result.batchesId.length == i){
