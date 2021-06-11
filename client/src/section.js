@@ -276,15 +276,15 @@ export default function Section(props) {
                         "linear-gradient()",
                       border: " 1px solid #3f51b5",
                     }}
-                    onClick={() => {
-                      handleOnCard(_id);
-                    }}
                   >
                     <CardMedia
                       className={classes.cardMedia}
                       image={`./../assets/images/${images[0]}`}
                       title="Image title"
                       style={{ borderBottom: " 1px solid #3f51b5" }}
+                      onClick={() => {
+                        handleOnCard(_id);
+                      }}
                     />
                     <CardContent className={classes.cardContent}>
                       <Typography gutterBottom variant="h5" component="h2">

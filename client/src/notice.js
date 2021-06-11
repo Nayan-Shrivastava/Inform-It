@@ -460,7 +460,9 @@ export default function Section(props) {
                 popLink.length !== 0 &&
                 popLink.map((pop) => (
                   <Typography>
-                    <Link to={pop}>{pop}</Link>
+                    <a href={pop} target="_blank">
+                      {pop}
+                    </a>
 
                     <br />
                   </Typography>
@@ -502,24 +504,24 @@ export default function Section(props) {
                       maxHeight: "450px",
                       border: " 1px solid #3f51b5",
                     }}
-                    onClick={() => {
-                      handleClickOpen2();
-                      handlePop(
-                        body,
-                        heading,
-                        subHeading,
-                        priority,
-                        impLinks,
-                        deadline,
-                        by
-                      );
-                    }}
                   >
                     <CardMedia
                       className={classes.cardMedia}
                       image={`./../assets/images/${images[0]}`}
                       title="Image title"
                       style={{ borderBottom: " 1px solid #3f51b5" }}
+                      onClick={() => {
+                        handleClickOpen2();
+                        handlePop(
+                          body,
+                          heading,
+                          subHeading,
+                          priority,
+                          impLinks,
+                          deadline,
+                          by
+                        );
+                      }}
                     />
                     <CardContent className={classes.cardContent}>
                       <Typography gutterBottom variant="h5" component="h2">
@@ -539,7 +541,10 @@ export default function Section(props) {
                           impLinks.length !== 0 &&
                           impLinks.map((imp) => (
                             <Typography>
-                              <Link to={imp}>{imp}</Link>
+                              {/* <Link to={imp}>{imp}</Link> */}
+                              <a href={imp} target="_blank">
+                                {imp}
+                              </a>
 
                               <br />
                             </Typography>
