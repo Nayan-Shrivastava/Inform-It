@@ -168,7 +168,7 @@ router.post("/get-all-batches",verifyToken, async(req,res) => {
     User.findById(id)
     .then((result) => {
         
-        console.log(result.batchesId)
+        // console.log(result.batchesId)
         //res.status(200).json(result);
         let arrbatches = [];
 
@@ -185,7 +185,7 @@ router.post("/get-all-batches",verifyToken, async(req,res) => {
                 if(result.batchesId.length == i){
                     let copiedResult = JSON.parse(JSON.stringify(result));
                     copiedResult.arrbatches = arrbatches;
-                    console.log(copiedResult);
+                    // console.log(copiedResult);
                     res.status(200).json(copiedResult);
                 }
             }).catch((err) => {

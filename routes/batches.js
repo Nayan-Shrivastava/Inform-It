@@ -127,6 +127,41 @@ router.post("/get-batch",verifyToken, async(req,res) => {
 });
 
 
+//Delete Batch Object
+router.post("/delete-batch",verifyToken, async(req,res) => {
+   verifyUser(req,res,(authData) => {
+       const id = req.body.batchId;
+        Batch.findByIdAndRemove(id)
+        .then((result) => {
+            console.log("Deleted Batch => ",result);
+            res.status(200).json(result);
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(404).json("Some internal error");
+         });
+    });    
+});
+
+
+//update Batch
+router.post("/update-batch",verifyToken, async(req,res) => {
+   verifyUser(req,res,(authData) => {
+       const batchId = req.body.batchId;
+        Batch.findByIdAndUpdate(batchId,{ name : req.body.name, description : req.body.description },(err,result) => {
+            if(err){
+                console.log(err);
+                console.log("------- Batch Not updated -------");
+                res.status(200).json({error : "some error"});
+            }
+            else{
+                console.log(result);
+                console.log("------- Batch Successfully updated -------");
+                res.status(200).json({isUpdated : true});
+            }
+        });
+    });    
+});
 
 
 router.get("/", (req,res) => {
