@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
+import GitHubIcon from "@material-ui/icons/GitHub";
 import axios from "axios";
 import AppBar from "@material-ui/core/AppBar";
 import Button from "@material-ui/core/Button";
@@ -426,8 +427,8 @@ export default function Template() {
               onChange={(e) => setBatchName(e.target.value)}
             />
             {invalidBatch !== undefined && (
-                              <p style={{ color: "red" }}>{invalidBatch}</p>
-                            )}
+              <p style={{ color: "red" }}>{invalidBatch}</p>
+            )}
             <TextField
               autoFocus
               multiline="true"
@@ -546,9 +547,9 @@ export default function Template() {
           component="p"
         >
           Welcome to our Project Page. We're sorry for any inconvenience! It's
-          still in development ¯\_(ツ)_/¯
+          still in development ¯\_(ツ)_/¯.
           <br />
-          This project is developed by
+          This project is developed by :
           <a
             href="https://www.linkedin.com/in/purva-joshi-1a49061b4/"
             target="_blank"
@@ -578,6 +579,8 @@ export default function Template() {
             Aasim Akhtar
           </a>
           {"."}
+          <br />
+          <GitHubIcon style={{ color: "black" }} />
         </Typography>
       </footer>
       {/* End footer */}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import axios from "axios";
+import GitHubIcon from "@material-ui/icons/GitHub";
 import AppBar from "@material-ui/core/AppBar";
 import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card";
@@ -320,7 +321,40 @@ export default function Section(props) {
           component="p"
         >
           Welcome to our Project Page. We're sorry for any inconvenience! It's
-          still in development ¯\_(ツ)_/¯
+          still in development ¯\_(ツ)_/¯.
+          <br />
+          This project is developed by :
+          <a
+            href="https://www.linkedin.com/in/purva-joshi-1a49061b4/"
+            target="_blank"
+          >
+            {" "}
+            Purva Joshi{", "}
+          </a>
+          <a
+            href="https://www.linkedin.com/in/nayan-shrivastava-b85a091ab"
+            target="_blank"
+          >
+            {" "}
+            Nayan Shrivastava{", "}
+          </a>
+          <a
+            href="https://www.linkedin.com/in/juhi-ojha-3831251ab"
+            target="_blank"
+          >
+            {" "}
+            Juhi Ojha{", "}
+          </a>
+          <a
+            href="https://www.linkedin.com/in/aasim-akhtar-88a753159"
+            target="_blank"
+          >
+            {" "}
+            Aasim Akhtar
+          </a>
+          {"."}
+          <br />
+          <GitHubIcon style={{color:"black"}} />
         </Typography>
       </footer>
       {/* End footer */}
