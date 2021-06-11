@@ -60,7 +60,8 @@ export default function Login() {
           </Typography>
         </Toolbar>
       </AppBar>
-      <main>
+      <main
+      >
         <Grid container spacing={2} justify="space-evenly">
           <Grid item style={{ marginTop: "5%" }}>
             <img

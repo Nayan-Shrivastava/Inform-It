@@ -170,7 +170,15 @@ export default function Section(props) {
           </Grid>
         </Grid>
       </AppBar>
-      <main>
+      <main
+        style={{
+          // backgroundImage: `url("./../assets/images/background.png")`,
+          backgroundImage: "linear-gradient(#f5f7fa ,#c3cfe2)",
+          // backgroundImage: "linear-gradient(to right, #e0eafc, #cfdef3)",
+
+          backgroundRepeat: "none",
+        }}
+      >
         {/* Hero unit */}
         <div className={classes.heroContent}>
           <Container maxWidth="sm">
@@ -260,7 +268,14 @@ export default function Section(props) {
                 <Grid item key={index} xs={12} sm={6} md={4}>
                   <Card
                     className={classes.index}
-                    style={{ minHeight: "400px", maxHeight: "400px" }}
+                    style={{
+                      minHeight: "400px",
+                      maxHeight: "400px",
+                      backgroundImage:
+                        // "linear-gradient(to right, #e0eafc, #cfdef3)",
+                        "linear-gradient()",
+                      border: " 1px solid #3f51b5",
+                    }}
                     onClick={() => {
                       handleOnCard(_id);
                     }}
@@ -269,6 +284,7 @@ export default function Section(props) {
                       className={classes.cardMedia}
                       image={`./../assets/images/${images[0]}`}
                       title="Image title"
+                      style={{ borderBottom: " 1px solid #3f51b5" }}
                     />
                     <CardContent className={classes.cardContent}>
                       <Typography gutterBottom variant="h5" component="h2">

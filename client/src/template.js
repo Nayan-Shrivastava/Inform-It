@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
+import MoreVertIcon from "@material-ui/icons/MoreVert";
 import axios from "axios";
 import AppBar from "@material-ui/core/AppBar";
 import Button from "@material-ui/core/Button";
-import AnnouncementIcon from "@material-ui/icons/Announcement";
+import CardActions from "@material-ui/core/CardActions";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import CardMedia from "@material-ui/core/CardMedia";
@@ -25,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
   icon: {
     marginRight: theme.spacing(2),
     //marginLeft: -15,
-    maxWidth:35,
+    maxWidth: 35,
   },
   heroContent: {
     backgroundColor: theme.palette.background.paper,
@@ -66,6 +67,7 @@ export default function Template() {
   const [invalidBatch, setInvalidBatch] = useState("");
   const [batchName, setBatchName] = useState("");
   const [batchDescription, setBatchDescription] = useState("");
+  const [updateOpen, setUpdateOpen] = useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -91,6 +93,62 @@ export default function Template() {
       authorization: "Bearer " + localStorage.getItem("token"),
     },
   };
+  function handleUpdateOpen() {
+    setUpdateOpen(true);
+  }
+  function handleOnUpdatePop(upname, updes,upid) {
+    setBatchName(upname);
+    setBatchDescription(updes);
+    setBatchId(upid);
+  }
+  function handleOnUpdate() {
+    const ob = { batchId: batchId, name: batchName, description: batchDescription };
+    if (batchName === "") {
+      setInvalidBatch("*Please fill out this field");
+    } else {
+    axios
+      .post("/api/batches/update-batch", ob, axiosConfig)
+      .then(function (response) {
+        //handle Success
+        // console.log("hi", response);
+        console.log(response);
+        if ("error" in response.data) {
+          //  handleOnTokenNotFound();
+          console.log("galat h bhai ");
+        } else {
+          console.log("sahi h", response.data);
+          handleCancel();
+          window.location.reload(false);
+        }
+      })
+      .catch(function (error) {
+        // handle error
+        console.log("hii ", error);
+      });
+    }
+  }
+
+  function handleOnDelete(id) {
+    const ob = { batchId: id };
+    axios
+      .post("/api/batches/delete-batch", ob, axiosConfig)
+      .then(function (response) {
+        //handle Success
+        // console.log("hi", response);
+        console.log(response);
+        if ("error" in response.data) {
+          //  handleOnTokenNotFound();
+          console.log("galat h bhai ");
+        } else {
+          console.log("sahi h", response.data);
+          window.location.reload(false);
+        }
+      })
+      .catch(function (error) {
+        // handle error
+        console.log("hii ", error);
+      });
+  }
   const handleCancel = () => {
     setOpen(false);
     setOpen2(false);
@@ -98,6 +156,7 @@ export default function Template() {
     setBatchId("");
     setBatchName("");
     setBatchDescription("");
+    setUpdateOpen(false);
   };
   const handleCreateClose = (e) => {
     e.preventDefault();
@@ -116,8 +175,7 @@ export default function Template() {
             handleOnTokenNotFound();
           } else {
             console.log("sahi h", response.data);
-            setInvalidBatch("");
-            setOpen2(false);
+            handleCancel();
             window.location.reload(false);
           }
         })
@@ -152,8 +210,7 @@ export default function Template() {
           }
         } else {
           console.log("sahi h", response.data);
-          setInvalidBatch("");
-          setOpen(false);
+          handleCancel();
 
           window.location.reload(false);
         }
@@ -187,18 +244,16 @@ export default function Template() {
   return (
     <React.Fragment>
       <CssBaseline />
-
       <AppBar position="relative">
         <Grid container spacing={2} justify="space-between">
           <Grid item>
-  
-              {/* <AnnouncementIcon className={classes.icon} /> */}
-              <Toolbar>
-                <img
-                  src="./../assets/images/logo.png"
-                  alt="logo"
-                  className={classes.icon}
-                />
+            {/* <AnnouncementIcon className={classes.icon} /> */}
+            <Toolbar>
+              <img
+                src="./../assets/images/logo.png"
+                alt="logo"
+                className={classes.icon}
+              />
               <Typography variant="h6" color="inherit">
                 Inform-it
               </Typography>
@@ -209,9 +264,25 @@ export default function Template() {
           </Grid>
         </Grid>
       </AppBar>
-      <main>
+      <main
+        style={{
+          // backgroundImage: `url("./../assets/images/background.png")`,
+          // background: "linear-gradient(a1c4fd,#c2e9fb)",
+          backgroundImage: "linear-gradient(#f5f7fa ,#c3cfe2)",
+
+          backgroundRepeat: "none",
+        }}
+      >
         {/* Hero unit */}
-        <div className={classes.heroContent}>
+        <div
+          className={classes.heroContent}
+          // style={{
+          //   backgroundImage: `url("./../assets/images/header.png")`,
+
+          //   backgroundRepeat: "no-repeat",
+          //   backgroundSize: "cover",
+          // }}
+        >
           <Container maxWidth="sm">
             <Typography
               component="h1"
@@ -334,6 +405,50 @@ export default function Template() {
             </div>
           </Container>
         </div>
+        <Dialog
+          open={updateOpen}
+          onClose={handleOnUpdate}
+          fullWidth
+          aria-labelledby="form-dialog-title"
+        >
+          <DialogTitle id="form-dialog-title">Update a Batch : </DialogTitle>
+          <DialogContent>
+            <DialogContentText>Update Batch Details : </DialogContentText>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="Batch Name"
+              label="Batch Name"
+              type="text"
+              value={batchName}
+              fullWidth
+              required
+              onChange={(e) => setBatchName(e.target.value)}
+            />
+            {invalidBatch !== undefined && (
+                              <p style={{ color: "red" }}>{invalidBatch}</p>
+                            )}
+            <TextField
+              autoFocus
+              multiline="true"
+              margin="dense"
+              id="Description"
+              label="Description"
+              type="text"
+              value={batchDescription}
+              fullWidth
+              onChange={(e) => setBatchDescription(e.target.value)}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCancel} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleOnUpdate} color="primary">
+              Submit
+            </Button>
+          </DialogActions>
+        </Dialog>
         <Container className={classes.cardGrid} maxWidth="md">
           {/* End hero unit */}
           <Grid container spacing={4}>
@@ -349,15 +464,25 @@ export default function Template() {
                 <Grid item key={index} xs={12} sm={6} md={4}>
                   <Card
                     className={classes.index}
-                    style={{ minHeight: "400px", maxHeight: "400px" }}
-                    onClick={() => {
-                      handleOnCard(_id);
+                    style={{
+                      minHeight: "450px",
+                      maxHeight: "450px",
+                      border: " 1px solid #3f51b5",
                     }}
                   >
+                    {/* <MoreVertIcon
+                      color="primary"
+                      fontSize="medium"
+                      style={{ position: "right" }}
+                    ></MoreVertIcon> */}
                     <CardMedia
                       className={classes.cardMedia}
                       image={`./../assets/images/${images[0]}`}
                       title="Image title"
+                      style={{ borderBottom: " 1px solid #3f51b5" }}
+                      onClick={() => {
+                        handleOnCard(_id);
+                      }}
                     />
                     <CardContent className={classes.cardContent}>
                       <Typography gutterBottom variant="h5" component="h2">
@@ -378,6 +503,29 @@ export default function Template() {
                         Batch Id : <br />
                         {_id}
                       </Typography>
+                      <br></br>
+                      <CardActions>
+                        <Button
+                          size="small"
+                          color="primary"
+                          onClick={() => {
+                            handleUpdateOpen();
+                            handleOnUpdatePop(name, description, _id);
+                          }}
+                        >
+                          Update
+                        </Button>
+
+                        <Button
+                          size="small"
+                          color="primary"
+                          onClick={() => {
+                            handleOnDelete(_id);
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </CardActions>
                     </CardContent>
                   </Card>
                 </Grid>
@@ -399,6 +547,37 @@ export default function Template() {
         >
           Welcome to our Project Page. We're sorry for any inconvenience! It's
           still in development ¯\_(ツ)_/¯
+          <br />
+          This project is developed by
+          <a
+            href="https://www.linkedin.com/in/purva-joshi-1a49061b4/"
+            target="_blank"
+          >
+            {" "}
+            Purva Joshi{", "}
+          </a>
+          <a
+            href="https://www.linkedin.com/in/nayan-shrivastava-b85a091ab"
+            target="_blank"
+          >
+            {" "}
+            Nayan Shrivastava{", "}
+          </a>
+          <a
+            href="https://www.linkedin.com/in/juhi-ojha-3831251ab"
+            target="_blank"
+          >
+            {" "}
+            Juhi Ojha{", "}
+          </a>
+          <a
+            href="https://www.linkedin.com/in/aasim-akhtar-88a753159"
+            target="_blank"
+          >
+            {" "}
+            Aasim Akhtar
+          </a>
+          {"."}
         </Typography>
       </footer>
       {/* End footer */}

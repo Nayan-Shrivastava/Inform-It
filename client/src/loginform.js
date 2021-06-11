@@ -7,6 +7,7 @@ import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import axios from "axios";
+import clsx from "clsx";
 import "./login.css";
 import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
@@ -14,7 +15,14 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import Grid from "@material-ui/core/Grid";
+import IconButton from "@material-ui/core/IconButton";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import VisibilityIcon from "@material-ui/icons/Visibility";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
+import FormControl from "@material-ui/core/FormControl";
+import OutlinedInput from "@material-ui/core/OutlinedInput";
+import InputLabel from "@material-ui/core/InputLabel";
 //import Template from "./template";
 const useStyles = makeStyles((theme) => ({
   icon: {
@@ -65,7 +73,28 @@ export default function Loginform(props) {
   const [invalidMessage, setInvalidMessage] = useState("");
   const [invalidMobile, setInvalidMobile] = useState("");
   const [invalidEmail, setInvalidEmail] = useState("");
+  const [invalidEmail2, setInvalidEmail2] = useState("");
   const [invalidName, setInvalidName] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
+  const handleClickShowPassword = () => {
+    setShowPwd(!showPwd);
+  };
+
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
+  function validEmail(e) {
+    const regex = RegExp(
+      /^[a-zA-Z0-9.!#$%&’+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)$/
+    );
+
+    if (!regex.test(e)) {
+      setInvalidEmail2("Please enter a valid email.");
+    } else {
+      setInvalidEmail2("");
+      setEmail(e);
+    }
+  }
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -87,11 +116,16 @@ export default function Loginform(props) {
     setMobileNumber("");
     setInvalidEmail("");
     setInvalidName("");
+    setInvalidEmail2("");
   };
   const handleOnLogin = () => history.push({ pathname: "/" });
 
   const registerHandler = (e) => {
     e.preventDefault();
+    setInvalidName("");
+    setInvalidEmail("");
+    setInvalidMobile("");
+    setInvalidMessage("");
     const ob = {
       name: regName,
       username: regUserName,
@@ -103,18 +137,21 @@ export default function Loginform(props) {
 
     //console.log(ob);
     if (
-      regName === "" ||
-      regUserName === "" ||
-      regPassword === "" ||
-      email === ""
+      regName.trim() === "" ||
+      regUserName.trim() === "" ||
+      regPassword.trim() === "" ||
+      email.trim() === ""
     ) {
-      setInvalidMessage("Please fill out all the required fields");
+      setInvalidMessage("Please fill out all the required fields.");
     } else {
       setInvalidMessage("");
-      if (mobileNumber.length !== 10 && mobileNumber.length !== 0) {
-        setInvalidMobile("Please enter a valid mobile number");
-      } else {
+      if (mobileNumber.trim().length !== 10 && mobileNumber.length !== 0) {
+        setInvalidMobile("Please enter a valid mobile number.");
+      } else if (invalidEmail2 !== "") {
         setInvalidMobile("");
+        console.log("138 : ");
+      } else {
+        setInvalidEmail2("");
         axios
           .post("/api/users/create_user/", ob)
           .then(function (response) {
@@ -122,14 +159,14 @@ export default function Loginform(props) {
             if ("error" in response.data) {
               if (response.data.error === "email exists") {
                 setInvalidEmail(
-                  `An account with Email  already exists.\nPlease try a different Email Address`
+                  `An account with ${email}  already exists.\nPlease try a different Email Address.`
                 );
               } else {
                 setInvalidEmail("");
 
                 if (response.data.error === "username exists") {
                   setInvalidName(
-                    `An account with Username  already exists.\nPlease try a different Username.`
+                    `An account with ${userName}  already exists.\nPlease try a different Username.`
                   );
                 } else {
                   setInvalidName("");
@@ -148,6 +185,7 @@ export default function Loginform(props) {
               setMobileNumber("");
               setInvalidEmail("");
               setInvalidName("");
+              setInvalidEmail2("");
             }
           })
           .catch(function (error) {
@@ -188,9 +226,7 @@ export default function Loginform(props) {
   return (
     <form>
       <Grid>
-        <Grid
-          item
-        >
+        <Grid item>
           <FormLabel for="userName">
             <b>Username : </b>
           </FormLabel>
@@ -227,11 +263,10 @@ export default function Loginform(props) {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <br/>
-          
+          <br />
+
           {string !== undefined && <p style={{ color: "red" }}>{string}</p>}
           <br />
-         
         </Grid>
         <Grid item>
           <Button
@@ -273,7 +308,6 @@ export default function Loginform(props) {
               required
               onChange={(e) => setRegName(e.target.value)}
             />
-
             <TextField
               variant="outlined"
               autoFocus
@@ -288,34 +322,77 @@ export default function Loginform(props) {
             {invalidName !== undefined && (
               <p style={{ color: "red" }}>{invalidName}</p>
             )}
-
-            <TextField
+            {/* <TextField
+              htmlFor="outlined-adornment-password"
               variant="outlined"
               autoFocus
               margin="dense"
               id="regPassword"
               label="Password"
-              type="password"
+              type={showPwd ? "text" : "password"}
               fullWidth
               required
               onChange={(e) => setRegPassword(e.target.value)}
-            />
-
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    onMouseDown={handleMouseDownPassword}
+                    edge="end"
+                  >
+                    {showPwd ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                  </IconButton>
+                </InputAdornment>
+              }
+            /> */}
+            <FormControl
+              className={clsx(classes.margin, classes.textField)}
+              variant="outlined"
+              autoFocus
+              fullWidth
+              required
+              size="small"
+            >
+              <InputLabel htmlFor="outlined-adornment-password">
+                Password
+              </InputLabel>
+              <OutlinedInput
+                variant="outlined"
+                id="outlined-adornment-password"
+                type={showPwd ? "text" : "password"}
+                onChange={(e) => setRegPassword(e.target.value)}
+                endAdornment={
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}
+                      edge="end"
+                    >
+                      {showPwd ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                    </IconButton>
+                  </InputAdornment>
+                }
+                labelWidth={80}
+              />
+            </FormControl>
             <TextField
               variant="outlined"
               autoFocus
               margin="dense"
               id="email"
               label="Email"
-              type="text"
               fullWidth
               required
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => validEmail(e.target.value)}
             />
             {invalidEmail !== undefined && (
               <p style={{ color: "red" }}>{invalidEmail}</p>
             )}
-
+            {invalidEmail2 !== undefined && (
+              <p style={{ color: "red" }}>{invalidEmail2}</p>
+            )}
             <TextField
               variant="outlined"
               autoFocus

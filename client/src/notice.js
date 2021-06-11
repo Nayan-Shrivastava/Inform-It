@@ -195,11 +195,7 @@ export default function Section(props) {
       setInvalidMessage("*Please fill out all the required fields");
     } else {
       axios
-        .post(
-          "/api/sections/create-notice",
-          ob,
-          axiosConfig
-        )
+        .post("/api/sections/create-notice", ob, axiosConfig)
         .then(function (response) {
           console.log(response);
 
@@ -264,7 +260,13 @@ export default function Section(props) {
           </Grid>
         </Grid>
       </AppBar>
-      <main>
+      <main
+        style={{
+          // backgroundImage: `url("./../assets/images/background.png")`,
+          backgroundRepeat: "none",
+          backgroundImage: "linear-gradient(#f5f7fa ,#c3cfe2)",
+        }}
+      >
         {/* Hero unit */}
         <div className={classes.heroContent}>
           <Container maxWidth="sm">
@@ -495,7 +497,11 @@ export default function Section(props) {
                 <Grid item key={index} xs={12} sm={6} md={4}>
                   <Card
                     className={classes.index}
-                    style={{ minHeight: "450px", maxHeight: "450px" }}
+                    style={{
+                      minHeight: "450px",
+                      maxHeight: "450px",
+                      border: " 1px solid #3f51b5",
+                    }}
                     onClick={() => {
                       handleClickOpen2();
                       handlePop(
@@ -513,6 +519,7 @@ export default function Section(props) {
                       className={classes.cardMedia}
                       image={`./../assets/images/${images[0]}`}
                       title="Image title"
+                      style={{ borderBottom: " 1px solid #3f51b5" }}
                     />
                     <CardContent className={classes.cardContent}>
                       <Typography gutterBottom variant="h5" component="h2">
