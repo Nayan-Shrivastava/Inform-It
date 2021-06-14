@@ -207,6 +207,7 @@ router.post("/get-all-batches",verifyToken, async(req,res) => {
                           // Turn your strings into dates, and then subtract them
                           // to get a value that is either negative, positive, or zero.
                           return new Date(b.updatedAt) - new Date(a.updatedAt);;
+                      });
                     // console.log(copiedResult);
                     res.status(200).json(copiedResult);
                 }

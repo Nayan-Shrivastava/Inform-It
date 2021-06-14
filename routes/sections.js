@@ -145,7 +145,8 @@ router.post("/get-all-notices",verifyToken, async(req,res) => {
                         copiedResult.arrnotices = arrnotices.sort(function(a,b){
                           // Turn your strings into dates, and then subtract them
                           // to get a value that is either negative, positive, or zero.
-                          return new Date(b.updatedAt) - new Date(a.updatedAt);;
+                          return new Date(b.updatedAt) - new Date(a.updatedAt);
+                      });
                         console.log(copiedResult);
                         res.status(200).json(copiedResult);
                     }
