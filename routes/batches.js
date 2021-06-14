@@ -23,48 +23,49 @@ const addSectionIdtoBatch = (sectionId,batchId) => {
 // Create a Section under given Batch
 router.post("/create-section/",verifyToken, async (req,res) => {
     verifyUser(req,res,(authData) => {
-        userId = authData._id;   
+        userId = authData._id;
+        username = authData.username
     });    
-        //const userId = req.body.userid; //user id
-        const batchId = req.body.batchId; //user id
-        try{
-            const batch = await Batch.findById(batchId);
-            if(!batch){
-                res.status(200).json( { error : "batch not found"} );
-            }else{
-                //if(batch.adminId.includes(userId) || batch.superAdmin === userId){
-                    try{
-                        const newSection = new Section({
-                            name : req.body.name,
-                            description : req.body.description,
-                            batchId : req.body.batchId
-                        });
+    //const userId = req.body.userid;
+    const batchId = req.body.batchId;
 
-                        // Save section and response
-                        await newSection.save().then((section) => {
-                            console.log(section._id,section.batchId);
-                            addSectionIdtoBatch(section._id,section.batchId);
-                            res.status(200).json(section);
-                        }).catch((err) => {
-                            res.status(500).json(err);
-                        });
+    Batch.findById(batchId)
+    .then( async (batch) => {
+        if(!batch){
+            res.status(200).json( { error : "batch not found"} );
+        }
+        else if (!batch.adminId.includes(userId) && userId != batch.superAdmin ) {
+            res.status(200).json({
+                error : "You are not An Admin"
+            });
+        }else{
+                try{
+                    const newSection = new Section({
+                        name : req.body.name,
+                        description : req.body.description,
+                        batchId : req.body.batchId
+                    });
 
-                    }catch(err){
+                    // Save section and response
+                    await newSection.save().then((section) => {
+                        console.log(section._id,section.batchId);
+                        addSectionIdtoBatch(section._id,section.batchId);
+                        res.status(200).json(section);
+                    }).catch((err) => {
                         res.status(500).json(err);
+                    });
 
-                    };
-    /*
-                }else{
-                    res.status(400).json("user is not admin");
-                }
-    */
+                }catch(err){
+                    res.status(500).json(err);
+
+                };
             }
-    }catch(err){
-        console.log(err)
-        res.status(200).json({
-            error : "batch not found"
+        })
+        .catch((err)=> {
+            console.log(err);
+            res.status(200).json( { error : "batch not found"} );
+
         });
-    }
 });
 
 // Get batch object with all it's sections
@@ -82,31 +83,43 @@ router.post("/get-all-sections",verifyToken, async(req,res) => {
 
             
             var i = 0;
-            for (let x of result.sectionId){
-            	
-            		Section.findById(x)
-                    .then((b) => {
-            		arrsections.push(JSON.parse(JSON.stringify(b)));
-            		//console.log(b);
-                    i += 1;
-                    if(result.sectionId.length == i){
-                        let copiedResult = JSON.parse(JSON.stringify(result));
-                        copiedResult.arrsections = arrsections;
-                        console.log(copiedResult);
-                        res.status(200).json(copiedResult);
-                    }
-                }).catch((err) => {
-            		console.log(err);
-                    i += 1
-            	});
+            if (result.sectionId.length !== 0){
+                for (let x of result.sectionId){
+                    
+                        Section.findById(x)
+                        .then((b) => {
+                            if(b != null){
+                                arrsections.push(JSON.parse(JSON.stringify(b)));
+                            }
+                        //console.log(b);
+                        i += 1;
+                        if(result.sectionId.length == i){
+                            let copiedResult = JSON.parse(JSON.stringify(result));
+                            copiedResult.arrsections = arrsections.sort(function(a,b){
+                          // Turn your strings into dates, and then subtract them
+                          // to get a value that is either negative, positive, or zero.
+                          return new Date(b.updatedAt) - new Date(a.updatedAt);;
+                            console.log(copiedResult);
+                            res.status(200).json(copiedResult);
+                        }
+                    }).catch((err) => {
+                        console.log(err);
+                        i += 1
+                    });
+                }
+            }else{
+                let copiedResult = JSON.parse(JSON.stringify(result));
+                copiedResult.arrsections = [];
+                res.status(200).json(copiedResult);
             }
         })
         .catch((err) => {
             console.log(err);
             res.status(200).json({"error": "Batch not found"});
-    	}); 
-    });  
-});
+        });
+    }); 
+});  
+
 
 
 
@@ -130,16 +143,27 @@ router.post("/get-batch",verifyToken, async(req,res) => {
 //Delete Batch Object
 router.post("/delete-batch",verifyToken, async(req,res) => {
    verifyUser(req,res,(authData) => {
-       const id = req.body.batchId;
-        Batch.findByIdAndRemove(id)
-        .then((result) => {
-            console.log("Deleted Batch => ",result);
-            res.status(200).json(result);
-        })
-        .catch((err) => {
-            console.log(err);
-            res.status(404).json("Some internal error");
-         });
+        userId = authData._id;
+        username = authData.username
+        const id = req.body.batchId;
+        Batch.findById(id).then((batch) => {
+            if (userId != batch.superAdmin && username != batch.superAdminName) {
+                res.status(200).json({
+                    error : "You are not SuperAdmin"
+                });
+            }else{
+
+                Batch.findByIdAndRemove(id)
+                .then((result) => {
+                    console.log("Deleted Batch => ",result);
+                    res.status(200).json(result);
+                })
+                .catch((err) => {
+                    console.log(err);
+                    res.status(404).json("Some internal error");
+                 });
+            }
+        });     
     });    
 });
 
@@ -147,27 +171,98 @@ router.post("/delete-batch",verifyToken, async(req,res) => {
 //update Batch
 router.post("/update-batch",verifyToken, async(req,res) => {
    verifyUser(req,res,(authData) => {
-       const batchId = req.body.batchId;
-        Batch.findByIdAndUpdate(batchId,{ name : req.body.name, description : req.body.description },(err,result) => {
-            if(err){
-                console.log(err);
-                console.log("------- Batch Not updated -------");
-                res.status(200).json({error : "some error"});
+        userId = authData._id;
+        username = authData.username
+        const batchId = req.body.batchId;
+        Batch.findById(batchId)
+        .then((batch) => {
+            if (!batch.adminId.includes(userId) && userId != batch.superAdmin ) {
+                res.status(200).json({
+                    error : "You are not An Admin"
+                });
+            }else{
+
+                Batch.findByIdAndUpdate(batchId,{ name : req.body.name, description : req.body.description },(err,result) => {
+                    if(err){
+                        console.log(err);
+                        console.log("------- Batch Not updated -------");
+                        res.status(200).json({error : "some error"});
+                    }
+                    else{
+                        console.log(result);
+                        console.log("------- Batch Successfully updated -------");
+                        res.status(200).json({isUpdated : true});
+                    }
+                });
             }
-            else{
-                console.log(result);
-                console.log("------- Batch Successfully updated -------");
-                res.status(200).json({isUpdated : true});
-            }
+        })
+        .catch((err)=> {
+            console.log(err);
+            res.status(200).json({error : "batch not found"});
+
         });
     });    
+});
+
+
+router.post("/make-admin", verifyToken, (req,res) => {
+    verifyUser(req,res,(authData) => {
+        userId = authData._id;
+        username = authData.username
+    });
+
+    const batchId = req.body.batchId;
+    const newAdmin = req.body.newAdmin;
+
+    Batch.findById(batchId)
+    .then( async (batch) => {
+        if(!batch){
+            res.status(200).json( { error : "batch not found"} );
+        }
+        else if (!batch.adminId.includes(userId) && userId != batch.superAdmin ) {
+            res.status(200).json({
+                error : "not admin"
+            });
+        }else if (!batch.peopleId.includes(newAdmin)) {
+            res.status(200).json({
+                error : "not member"
+            });
+        }
+        else{
+                try{
+
+                    Batch.findByIdAndUpdate(batchId,{ $addToSet: { adminId: [newAdmin] } },(err,result) => {
+                        if(err){
+                            console.log(err);
+                            console.log("------- make-admin failed -------");
+                        }
+                        else{
+                            console.log(result);
+                            console.log("------- make-admin Success -------");
+                            res.status(200).json({
+                                message : "success"
+                            })
+                        }
+                    });
+
+                }catch(err){
+                    res.status(500).json(err);
+
+                };
+            }
+        })
+        .catch((err)=> {
+            console.log(err);
+            res.status(200).json( { error : "batch not found"} );
+
+        });
+
 });
 
 
 router.get("/", (req,res) => {
     res.send("Hey it's Batches route")
 });
-
 
 
 

@@ -37,6 +37,7 @@ router.post("/get-notice", async(req,res) => {
 });
 
 
+
 // Add Notice id to given Section object
 const addnoticeIdtoSection = (noticeId,sectionId) => {
      Section.findByIdAndUpdate(sectionId,{ $addToSet: { noticeId: [noticeId] } },(err,result) => {
@@ -141,7 +142,10 @@ router.post("/get-all-notices",verifyToken, async(req,res) => {
                     i += 1;
                     if(result.noticeId.length == i){
                         let copiedResult = JSON.parse(JSON.stringify(result));
-                        copiedResult.arrnotices = arrnotices;
+                        copiedResult.arrnotices = arrnotices.sort(function(a,b){
+                          // Turn your strings into dates, and then subtract them
+                          // to get a value that is either negative, positive, or zero.
+                          return new Date(b.updatedAt) - new Date(a.updatedAt);;
                         console.log(copiedResult);
                         res.status(200).json(copiedResult);
                     }
@@ -157,6 +161,108 @@ router.post("/get-all-notices",verifyToken, async(req,res) => {
         }); 
     });  
 });
+
+
+
+//delete Batch
+router.post("/delete-section",verifyToken, async(req,res) => {
+   verifyUser(req,res,(authData) => {
+        userId = authData._id;
+        //username = authData.username
+        const batchId = req.body.batchId;
+        const sectionId = req.body.sectionId;
+        Batch.findById(batchId)
+        .then((batch) => {
+            if (!batch.adminId.includes(userId) && userId != batch.superAdmin ) {
+                res.status(200).json({
+                    error : "You are not An Admin"
+                });
+            }else{
+                console.log("batch =>",batch);
+                Batch.findByIdAndUpdate(batchId  ,{ $pull: {sectionId: sectionId } },(err,result) => {
+                    if(err){
+                        console.log(err);
+                        console.log("------- removing sectionId failed -------");
+                    }
+                    else{
+                        console.log(result);
+                        console.log("------- removing sectionId Success -------");
+                    }
+                });
+
+
+                Section.findByIdAndRemove(sectionId)
+                .then((result) => {
+                    console.log("Deleted Section => ",result);
+                    res.status(200).json(result);
+                })
+                .catch((err) => {
+                    console.log(err);
+                    res.status(200).json({"error" : "section not found"});
+                 });
+
+                //$pullAll: {uid: [req.params.deleteUid]}
+
+
+
+            }
+        })
+        .catch((err)=> {
+            console.log(err);
+            res.status(200).json({"error" : "batch not found"});
+
+        });
+    });    
+});
+
+
+
+
+//update Batch
+router.post("/update-section",verifyToken, async(req,res) => {
+   verifyUser(req,res,(authData) => {
+        userId = authData._id;
+        username = authData.username
+        const batchId = req.body.batchId;
+        const sectionId = req.body.sectionId;
+        Batch.findById(batchId)
+        .then((batch) => {
+            if (!batch.adminId.includes(userId) && userId != batch.superAdmin ) {
+                res.status(200).json({
+                    error : "You are not An Admin"
+                });
+            }else{
+                if (req.body.description=== null || req.body.description.length === 0){
+                    req.body.description== " ";
+                }
+                if(req.body.name !== null && req.body.name.trim() !== ""){
+                    Section.findByIdAndUpdate(sectionId,{ name : req.body.name, description : req.body.description },(err,result) => {
+                        if(err){
+                            console.log(err);
+                            console.log("------- Section Not updated -------");
+                            res.status(200).json({error : "some error"});
+                        }
+                        else{
+                            console.log(result);
+                            console.log("------- Section Successfully updated -------");
+                            res.status(200).json({isUpdated : true});
+                        }
+                    });
+                }else{
+                    res.status(200).json({"error" : "name is required"});
+                }
+            }
+        })
+        .catch((err)=> {
+            console.log(err);
+            res.status(200).json({"error" : "batch not found"});
+
+        });
+    });    
+});
+
+
+
 router.get("/", (req,res) => {
     res.send("Hey it's Sections route")
 });

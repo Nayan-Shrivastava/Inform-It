@@ -103,20 +103,39 @@ router.post("/add-batch",verifyToken, async (req,res) => {
     verifyUser(req,res,(authData) => {
         userId = authData._id;   
     });
-
+    const batchId = req.body.batchId;
     try{
         const batch = await Batch.findById(req.body.batchId);
-            !batch && res.status(200).json({
+        if(!batch){
+            res.status(200).json({
                 error : "batch not found"
             });
-        if (addBatchIdtoUser(req.body.batchId,userId) == true){
-            res.status(200).json({
-                error : "internal error"
-            })
-        }else{
-            res.status(200).json({
-                message : "success"
-            })
+        }else {
+            //addBatchIdtoUser(req.body.batchId,userId);
+
+            User.findByIdAndUpdate(userId,{ $addToSet: { batchesId: [req.body.batchId] } },(err,result) => {
+                if(err){
+                    console.log(err);
+                    console.log("------- addBatchIdtoUser() Not updated -------");
+                }
+                else{
+                    console.log(result);
+                    console.log("------- addBatchIdtoUser() Successfully Added -------");
+                    Batch.findByIdAndUpdate(batchId,{ $addToSet: { peopleId: [userId] } },(err,result) => {
+                        if(err){
+                            console.log(err);
+                            console.log("------- make-admin failed -------");
+                        }
+                        else{
+                            console.log(result);
+                            console.log("------- make-admin Success -------");
+                            res.status(200).json({
+                                message : "success"
+                            })
+                        }
+                    });
+                }
+            });    
         }
     }catch{
         res.status(200).json({
@@ -175,29 +194,32 @@ router.post("/get-all-batches",verifyToken, async(req,res) => {
         
         var i = 0;
         for (let x of result.batchesId){
-        	
-        		Batch.findById(x)
+            
+                Batch.findById(x)
                 .then((b) => {
                     if(b!==null){
-        		arrbatches.push(JSON.parse(JSON.stringify(b)));}
-        		//console.log(b);
+                arrbatches.push(JSON.parse(JSON.stringify(b)));}
+                //console.log(b);
                 i += 1;
                 if(result.batchesId.length == i){
                     let copiedResult = JSON.parse(JSON.stringify(result));
-                    copiedResult.arrbatches = arrbatches;
+                    copiedResult.arrbatches = arrbatches.sort(function(a,b){
+                          // Turn your strings into dates, and then subtract them
+                          // to get a value that is either negative, positive, or zero.
+                          return new Date(b.updatedAt) - new Date(a.updatedAt);;
                     // console.log(copiedResult);
                     res.status(200).json(copiedResult);
                 }
             }).catch((err) => {
-        		console.log(err);
+                console.log(err);
                 i += 1
-        	});
+            });
         }
     })
     .catch((err) => {
         console.log(err);
         res.status(404).json("User not found");
-	});   
+    });   
 });
 
 
