@@ -70,6 +70,9 @@ export default function Template() {
   const [batchDescription, setBatchDescription] = useState("");
   const [updateOpen, setUpdateOpen] = useState(false);
   const user = JSON.parse(localStorage.getItem("user")); 
+  if(user === undefined){
+    handleOnTokenNotFound();
+  }
 
   const handleClickOpen = () => {
     setOpen(true);

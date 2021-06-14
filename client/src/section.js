@@ -74,6 +74,9 @@ export default function Section(props) {
   const [sectionId, setSectionId] = useState("");
   const [invalidSection, setInvalidSection] = useState("");
   const user = JSON.parse(localStorage.getItem("user"));
+  if (user === undefined) {
+    handleOnTokenNotFound();
+  }
   function handleOnCard(id) {
     history.push({ pathname: "/notice", state: id });
   }
