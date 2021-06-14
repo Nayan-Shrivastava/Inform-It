@@ -212,7 +212,7 @@ export default function Loginform(props) {
         } else {
           // console.log("else ",response);
           localStorage.setItem("token", response.data.token);
-          // console.log("token ", localStorage.getItem("token"));
+          localStorage.setItem("user", JSON.stringify(response.data.user));
           handleOnLogin();
         }
       })
