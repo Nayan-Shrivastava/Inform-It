@@ -20,11 +20,12 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import CardActions from "@material-ui/core/CardActions";
 
 const useStyles = makeStyles((theme) => ({
   icon: {
     marginRight: theme.spacing(2),
-   // marginLeft: -15,
+    // marginLeft: -15,
     maxWidth: 35,
   },
   heroContent: {
@@ -67,6 +68,12 @@ export default function Section(props) {
   const [invalidMessage, setInvalidMessage] = useState("");
   const [sectionName, setSectionName] = useState("");
   const [sectionDescription, setSectionDescription] = useState("");
+  //user
+
+  const [updateOpen, setUpdateOpen] = useState(false);
+  const [sectionId, setSectionId] = useState("");
+  const [invalidSection, setInvalidSection] = useState("");
+  const user = JSON.parse(localStorage.getItem("user"));
   function handleOnCard(id) {
     history.push({ pathname: "/notice", state: id });
   }
@@ -87,15 +94,83 @@ export default function Section(props) {
       authorization: "Bearer " + localStorage.getItem("token"),
     },
   };
+  function handleUpdateOpen() {
+    setUpdateOpen(true);
+  }
+  function handleOnUpdatePop(upname, updes, upid) {
+    setSectionName(upname);
+    setSectionDescription(updes);
+    setSectionId(upid);
+  }
+  function handleOnUpdate() {
+    const ob = {
+      sectionId: sectionId,
+      name: sectionName,
+      description: sectionDescription,
+      batchId: location.state.id,
+    };
+    if (sectionName === "") {
+      setInvalidSection("*Please fill out this field");
+    } else {
+      axios
+        .post("/api/sections/update-section", ob, axiosConfig)
+        .then(function (response) {
+          //handle Success
+          // console.log("hi", response);
+          console.log(response);
+          if ("error" in response.data) {
+            //  handleOnTokenNotFound();
+            console.log("galat h bhai ");
+          } else {
+            console.log("sahi h", response.data);
+            handleCancel();
+            window.location.reload(false);
+          }
+        })
+        .catch(function (error) {
+          // handle error
+          console.log("hii ", error);
+        });
+    }
+  }
+  function handleOnDelete(id) {
+    const ob = { sectionId: id, batchId: location.state.id };
+    axios
+      .post("/api/sections/delete-section", ob, axiosConfig)
+      .then(function (response) {
+        //handle Success
+        // console.log("hi", response);
+        console.log(response);
+        if ("error" in response.data) {
+          //  handleOnTokenNotFound();
+          console.log("galat h bhai ");
+        } else {
+          console.log("sahi h", response.data);
+          window.location.reload(false);
+        }
+      })
+      .catch(function (error) {
+        // handle error
+        console.log("hii ", error);
+      });
+  }
   const handleCancel = () => {
     setOpen(false);
     setSectionName("");
     setSectionDescription("");
     setInvalidMessage("");
+    setInvalidSection("");
+    setSectionId("");
+
+    setUpdateOpen(false);
   };
   const handleOnClose = (e) => {
     e.preventDefault();
-    const ob = {batchId: location.state, name: sectionName, description: sectionDescription  };
+    const ob = {
+      batchId: location.state.id,
+      name: sectionName,
+      description: sectionDescription,
+    };
     console.log(ob);
     if (sectionName === "") {
       setInvalidMessage("*Please fill out this field");
@@ -122,12 +197,12 @@ export default function Section(props) {
     }
   };
   useEffect(() => {
-    console.log(location.state);
+    // console.log(location.state);
 
     axios
       .post(
         "/api/batches/get-all-sections",
-        { batchId: location.state },
+        { batchId: location.state.id },
         axiosConfig
       )
       .then(function (response) {
@@ -203,13 +278,16 @@ export default function Section(props) {
             <div className={classes.heroButtons}>
               <Grid container spacing={2} justify="center">
                 <Grid item>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleClickOpen}
-                  >
-                    Create Section
-                  </Button>
+                  {(location.state.adminId.includes(user._id) ||
+                    user._id === location.state.superAdmin) && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleClickOpen}
+                    >
+                      Create Section
+                    </Button>
+                  )}
                   <Dialog
                     open={open}
                     onClose={handleOnClose}
@@ -261,17 +339,69 @@ export default function Section(props) {
             </div>
           </Container>
         </div>
+        <Dialog
+          open={updateOpen}
+          onClose={handleOnUpdate}
+          fullWidth
+          aria-labelledby="form-dialog-title"
+        >
+          <DialogTitle id="form-dialog-title">Update a Section: </DialogTitle>
+          <DialogContent>
+            <DialogContentText>Update Section Details : </DialogContentText>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="Batch Name"
+              label="Batch Name"
+              type="text"
+              value={sectionName}
+              fullWidth
+              required
+              onChange={(e) => setSectionName(e.target.value)}
+            />
+            {invalidSection !== undefined && (
+              <p style={{ color: "red" }}>{invalidSection}</p>
+            )}
+            <TextField
+              autoFocus
+              multiline="true"
+              margin="dense"
+              id="Description"
+              label="Description"
+              type="text"
+              value={sectionDescription}
+              fullWidth
+              onChange={(e) => setSectionDescription(e.target.value)}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCancel} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleOnUpdate} color="primary">
+              Submit
+            </Button>
+          </DialogActions>
+        </Dialog>
         <Container className={classes.cardGrid} maxWidth="md">
           {/* End hero unit */}
           <Grid container spacing={4}>
             {cards.map(
-              ({ index, name, description, createdAt, superAdmin, _id }) => (
+              ({
+                index,
+                name,
+                description,
+                createdAt,
+                superAdmin,
+                _id,
+                adminId,
+              }) => (
                 <Grid item key={index} xs={12} sm={6} md={4}>
                   <Card
                     className={classes.index}
                     style={{
-                      minHeight: "400px",
-                      maxHeight: "400px",
+                      minHeight: "320px",
+                      maxHeight: "320px",
                       backgroundImage:
                         // "linear-gradient(to right, #e0eafc, #cfdef3)",
                         "linear-gradient()",
@@ -298,10 +428,35 @@ export default function Section(props) {
                         {description.length <= 100 && `${description}`}
                       </Typography>
                       <br />
-                      <Typography>
+                      {/* <Typography>
                         Created On : {createdAt.slice(0, 10)}
-                      </Typography>
+                      </Typography> */}
                       {/* <Typography>Created By : {createdBy}</Typography> */}
+
+                      {(location.state.adminId.includes(user._id) ||
+                        user._id === location.state.superAdmin) && (
+                        <CardActions>
+                          <Button
+                            size="small"
+                            color="primary"
+                            onClick={() => {
+                              handleUpdateOpen();
+                              handleOnUpdatePop(name, description, _id);
+                            }}
+                          >
+                            Update
+                          </Button>
+                          <Button
+                            size="small"
+                            color="primary"
+                            onClick={() => {
+                              handleOnDelete(_id);
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </CardActions>
+                      )}
                     </CardContent>
                   </Card>
                 </Grid>
@@ -354,7 +509,7 @@ export default function Section(props) {
           </a>
           {"."}
           <br />
-          <GitHubIcon style={{color:"black"}} />
+          <GitHubIcon style={{ color: "black" }} />
         </Typography>
       </footer>
       {/* End footer */}

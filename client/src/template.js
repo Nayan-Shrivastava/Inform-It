@@ -69,6 +69,7 @@ export default function Template() {
   const [batchName, setBatchName] = useState("");
   const [batchDescription, setBatchDescription] = useState("");
   const [updateOpen, setUpdateOpen] = useState(false);
+  const user = JSON.parse(localStorage.getItem("user")); 
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -80,8 +81,8 @@ export default function Template() {
   const handleOnTokenNotFound = () => {
     history.push({ pathname: "/login" });
   };
-  function handleOnCard(id) {
-    history.push({ pathname: "/section", state: id });
+  function handleOnCard(id,superAdmin,adminId) {
+    history.push({ pathname: "/section", state: {id,superAdmin,adminId}});
   }
   //console.log("token ", localStorage.getItem("token"));
   if (localStorage.getItem("token") === null) {
@@ -461,6 +462,8 @@ export default function Template() {
                 createdAt,
                 superAdminName,
                 _id,
+                adminId,
+                superAdmin,
               }) => (
                 <Grid item key={index} xs={12} sm={6} md={4}>
                   <Card
@@ -482,7 +485,7 @@ export default function Template() {
                       title="Image title"
                       style={{ borderBottom: " 1px solid #3f51b5" }}
                       onClick={() => {
-                        handleOnCard(_id);
+                        handleOnCard(_id,superAdmin,adminId);
                       }}
                     />
                     <CardContent className={classes.cardContent}>
@@ -496,37 +499,39 @@ export default function Template() {
                         {description.length <= 100 && `${description}`}
                       </Typography>
                       <br />
-                      <Typography>
-                        Created On : {createdAt.slice(0, 10)}
-                      </Typography>
                       <Typography>Created By : {superAdminName}</Typography>
                       <Typography>
                         Batch Id : <br />
                         {_id}
                       </Typography>
-                      <br></br>
-                      <CardActions>
-                        <Button
-                          size="small"
-                          color="primary"
-                          onClick={() => {
-                            handleUpdateOpen();
-                            handleOnUpdatePop(name, description, _id);
-                          }}
-                        >
-                          Update
-                        </Button>
-
-                        <Button
-                          size="small"
-                          color="primary"
-                          onClick={() => {
-                            handleOnDelete(_id);
-                          }}
-                        >
-                          Delete
-                        </Button>
-                      </CardActions>
+                      
+            
+                      {(adminId.includes(user._id) ||
+                        user._id === superAdmin) && (
+                        <CardActions>
+                          <Button
+                            size="small"
+                            color="primary"
+                            onClick={() => {
+                              handleUpdateOpen();
+                              handleOnUpdatePop(name, description, _id);
+                            }}
+                          >
+                            Update
+                          </Button>
+                          
+                             {user._id === superAdmin && (<Button
+                              size="small"
+                              color="primary"
+                              onClick={() => {
+                                handleOnDelete(_id);
+                              }}
+                            >
+                              Delete
+                            </Button>)
+                          }
+                        </CardActions>
+                      )}
                     </CardContent>
                   </Card>
                 </Grid>
