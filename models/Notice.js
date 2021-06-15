@@ -10,6 +10,11 @@ const NoticeSchema = new mongoose.Schema({
 		type:String,
 		require: true,
 		default:null
+	},
+	createdByName : {
+		type:String,
+		require: true,
+		default:null
 	}, 
 	heading : {
 		type:String,
