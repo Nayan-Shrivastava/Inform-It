@@ -7,6 +7,7 @@ const morgan = require('morgan')
 const batchesRoute = require("./routes/batches");
 const usersRoute = require("./routes/users");
 const sectionsRoute = require("./routes/sections");
+const noticesRoute = require("./routes/notices");
 
 if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging') {
   app.use(express.static('client/build'));
@@ -40,6 +41,7 @@ app.set('view engine','ejs');
 app.use("/api/batches",batchesRoute);
 app.use("/api/users",usersRoute);
 app.use("/api/sections",sectionsRoute);
+app.use("/api/notices",noticesRoute);
 //app.use("/api/batches",batchesRoute);
 //app.use("/api/auth",authRoute);
 
