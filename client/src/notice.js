@@ -10,7 +10,6 @@ import CardContent from "@material-ui/core/CardContent";
 import CardMedia from "@material-ui/core/CardMedia";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Grid from "@material-ui/core/Grid";
-import Link from "@material-ui/core/Link";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
@@ -28,6 +27,7 @@ import Select from "@material-ui/core/Select";
 import InputLabel from "@material-ui/core/InputLabel";
 import FormControl from "@material-ui/core/FormControl";
 import Chip from "@material-ui/core/Chip";
+import CardActions from "@material-ui/core/CardActions";
 
 const useStyles = makeStyles((theme) => ({
   icon: {
@@ -100,7 +100,7 @@ export default function Section(props) {
   const [cards, setCards] = useState([]);
   const [name, setName] = useState("");
   const location = useLocation();
-  //for create section
+  //to create notice
   const [open, setOpen] = useState(false);
   const [invalidMessage, setInvalidMessage] = useState("");
   const [heading, setHeading] = useState("");
@@ -118,6 +118,15 @@ export default function Section(props) {
   const [popBy, setPopBy] = useState("");
   const [popLink, setPopLink] = useState([]);
   const [popDead, setPopDead] = useState("");
+  //user
+  const [updateOpen, setUpdateOpen] = useState(false);
+  const [noticeId, setNoticeId] = useState("");
+
+  // const [invalidSection, setInvalidSection] = useState("");
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (user === undefined) {
+    handleOnTokenNotFound();
+  }
   // const preventDefault = (event) => event.preventDefault();
   function handlePop(body, heading, subHeading, priority, link, dead, by) {
     setPopBody(body);
@@ -165,6 +174,92 @@ export default function Section(props) {
       authorization: "Bearer " + localStorage.getItem("token"),
     },
   };
+  function handleUpdateOpen() {
+    setUpdateOpen(true);
+  }
+  function handleOnUpdatePop(
+    upId,
+    upHeading,
+    upSubHeading,
+    upBody,
+    upBy,
+    upPriority,
+    upImpLinks,
+    upDeadline
+  ) {
+    setNoticeId(upId);
+    setHeading(upHeading);
+    setSubHeading(upSubHeading);
+    setBody(upBody);
+    setBy(upBy);
+    setPriority(upPriority);
+    setImpLinks(upImpLinks.join());
+    setDeadline(upDeadline);
+  }
+  function handleOnUpdate() {
+    const ob = {
+      sectionId: location.state.id,
+      noticeId: noticeId,
+      batchId: location.state.batchId,
+      heading: heading,
+      subHeading: subHeading,
+      by: by,
+      body: body,
+      priority: priority,
+      impLinks: impLinks,
+      deadline: deadline,
+    };
+    if (heading === "" || body === "") {
+      setInvalidMessage("*Please fill out all the required fields");
+    } else {
+      axios
+        .post("/api/notices/update-notice", ob, axiosConfig)
+        .then(function (response) {
+          //handle Success
+          // console.log("hi", response);
+          // console.log(response);
+          if ("error" in response.data) {
+            //  handleOnTokenNotFound();
+            console.log("response ", response);
+            console.log("galat h bhai ");
+          } else {
+            console.log("sahi h", response.data);
+            handleCancel();
+            window.location.reload(false);
+          }
+        })
+        .catch(function (error) {
+          // handle error
+          console.log("hii ", error);
+        });
+    }
+  }
+  function handleOnDelete(id) {
+    const ob = {
+      sectionId: location.state.id,
+      batchId: location.state.batchId,
+      noticeId: id,
+    };
+    axios
+      .post("/api/notices/delete-notice", ob, axiosConfig)
+      .then(function (response) {
+        //handle Success
+        // console.log("hi", response);
+        console.log(response);
+        if ("error" in response.data) {
+          console.log("", response);
+          //  handleOnTokenNotFound();
+          console.log("galat h bhai ");
+        } else {
+          console.log("sahi h", response.data);
+          window.location.reload(false);
+        }
+      })
+      .catch(function (error) {
+        // handle error
+        console.log("hii ", error);
+      });
+  }
   const handleCancel = () => {
     setOpen(false);
     setOpen2(false);
@@ -176,6 +271,7 @@ export default function Section(props) {
     setImpLinks("");
     setDeadline("");
     setBy("");
+    setUpdateOpen(false);
   };
   const handleOnClose = (e) => {
     e.preventDefault();
@@ -187,7 +283,8 @@ export default function Section(props) {
       impLinks: impLinks,
       deadline: deadline,
       by: by,
-      sectionId: location.state,
+      sectionId: location.state.id,
+      batchId: location.state.batchId,
     };
     console.log("hi ", ob);
     console.log("body", body);
@@ -211,12 +308,12 @@ export default function Section(props) {
     }
   };
   useEffect(() => {
-    console.log("hi ", location.state);
+    //console.log("hi ", location.state);
 
     axios
       .post(
         "/api/sections/get-all-notices",
-        { sectionId: location.state },
+        { sectionId: location.state.id },
         axiosConfig
       )
       .then(function (response) {
@@ -290,13 +387,16 @@ export default function Section(props) {
             <div className={classes.heroButtons}>
               <Grid container spacing={2} justify="center">
                 <Grid item>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleClickOpen}
-                  >
-                    Create Notice
-                  </Button>
+                  {(location.state.adminId.includes(user._id) ||
+                    user._id === location.state.superAdmin) && (
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleClickOpen}
+                    >
+                      Create Notice
+                    </Button>
+                  )}
                   <Dialog
                     open={open}
                     onClose={handleOnClose}
@@ -479,6 +579,131 @@ export default function Section(props) {
             </Button>
           </DialogActions>
         </Dialog>
+        <Dialog
+          open={updateOpen}
+          onClose={handleOnUpdate}
+          fullWidth
+          aria-labelledby="form-dialog-title"
+        >
+          <DialogTitle id="form-dialog-title">Update a Notice: </DialogTitle>
+          <DialogContent>
+            <DialogContentText>Update Notice Details : </DialogContentText>
+            <TextField
+              autoFocus
+              margin="dense"
+              value={heading}
+              id="heading"
+              label="Heading"
+              type="text"
+              variant="outlined"
+              fullWidth
+              required
+              onChange={(e) => setHeading(e.target.value)}
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              value={subHeading}
+              id="subHeading"
+              label="Sub Heading"
+              type="text"
+              variant="outlined"
+              fullWidth
+              onChange={(e) => setSubHeading(e.target.value)}
+            />
+            <br />
+
+            <ReactQuill
+              value={body}
+              theme="snow"
+              placeholder="Body*"
+              modules={modules}
+              required
+              style={{ marginTop: "3px" }}
+              format={formats}
+              onChange={(content) => setBody(content)}
+            />
+
+            <TextField
+              autoFocus
+              value={by}
+              margin="dense"
+              id="by"
+              label="By"
+              type="text"
+              variant="outlined"
+              fullWidth
+              onChange={(e) => setBy(e.target.value)}
+            />
+
+            <FormControl
+              variant="outlined"
+              className={classes.formControl}
+              fullWidth
+              style={{ marginTop: "3px" }}
+            >
+              <InputLabel htmlFor="outlined-age-native-simple">
+                Priority
+              </InputLabel>
+              <Select
+                native
+                label="Priority"
+                inputProps={{
+                  name: "Priority",
+                  id: "outlined-age-native-simple",
+                }}
+                value={priority}
+                variant="outlined"
+                autoFocus
+                margin="dense"
+                id="priority"
+                onChange={(e) => setPriority(e.target.value)}
+              >
+                <option value="" disabled></option>
+                <option value={1}>Low</option>
+                <option value={2}>Moderate</option>
+                <option value={3}>High</option>
+                <option value={4}>Very High</option>
+              </Select>
+            </FormControl>
+            <TextField
+              autoFocus
+              value={impLinks}
+              margin="dense"
+              id="impLinks"
+              label="Important Links"
+              type="text"
+              variant="outlined"
+              fullWidth
+              onChange={(e) => setImpLinks(e.target.value)}
+            />
+            <TextField
+              autoFocus
+              value={deadline}
+              margin="dense"
+              id="deadline"
+              label="Deadline"
+              variant="outlined"
+              type="Date"
+              fullWidth
+              InputLabelProps={{
+                shrink: true,
+              }}
+              onChange={(e) => setDeadline(e.target.value)}
+            />
+            {invalidMessage !== undefined && (
+              <p style={{ color: "red" }}>{invalidMessage}</p>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCancel} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleOnUpdate} color="primary">
+              Submit
+            </Button>
+          </DialogActions>
+        </Dialog>
         <Container className={classes.cardGrid} maxWidth="md">
           {/* End hero unit */}
           <Grid container spacing={4}>
@@ -490,7 +715,7 @@ export default function Section(props) {
                 by,
                 subHeading,
                 createdAt,
-                createdBy,
+                createdByName,
                 priority,
                 deadline,
                 impLinks,
@@ -500,8 +725,8 @@ export default function Section(props) {
                   <Card
                     className={classes.index}
                     style={{
-                      minHeight: "450px",
-                      maxHeight: "450px",
+                      minHeight: "470px",
+                      maxHeight: "470px",
                       border: " 1px solid #3f51b5",
                     }}
                   >
@@ -558,12 +783,43 @@ export default function Section(props) {
                           (priority === 4 && `Priority: Very High`)}
                       </Typography>
                       <Typography>
-                        Created On : {createdAt.slice(0, 10)}
-                      </Typography>
-                      <Typography>
                         Created By : <br />
-                        {createdBy}
+                        {createdByName}
                       </Typography>
+                      <br></br>
+                      {(location.state.adminId.includes(user._id) ||
+                        user._id === location.state.superAdmin) && (
+                        <CardActions>
+                          <Button
+                            size="small"
+                            color="primary"
+                            onClick={() => {
+                              handleUpdateOpen();
+                              handleOnUpdatePop(
+                                _id,
+                                heading,
+                                subHeading,
+                                body,
+                                by,
+                                priority,
+                                impLinks,
+                                deadline
+                              );
+                            }}
+                          >
+                            Update
+                          </Button>
+                          <Button
+                            size="small"
+                            color="primary"
+                            onClick={() => {
+                              handleOnDelete(_id);
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </CardActions>
+                      )}
                     </CardContent>
                   </Card>
                 </Grid>

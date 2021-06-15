@@ -78,7 +78,8 @@ export default function Section(props) {
     handleOnTokenNotFound();
   }
   function handleOnCard(id) {
-    history.push({ pathname: "/notice", state: id });
+    history.push({ pathname: "/notice", state: {id,batchId: location.state.id,superAdmin: location.state.superAdmin,adminId:location.state.adminId} });
+
   }
   const handleOnTokenNotFound = () => {
     history.push({ pathname: "/login" });
@@ -164,7 +165,6 @@ export default function Section(props) {
     setInvalidMessage("");
     setInvalidSection("");
     setSectionId("");
-
     setUpdateOpen(false);
   };
   const handleOnClose = (e) => {
@@ -395,9 +395,9 @@ export default function Section(props) {
                 name,
                 description,
                 createdAt,
-                superAdmin,
+              
                 _id,
-                adminId,
+               
               }) => (
                 <Grid item key={index} xs={12} sm={6} md={4}>
                   <Card

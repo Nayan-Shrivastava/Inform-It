@@ -69,8 +69,8 @@ export default function Template() {
   const [batchName, setBatchName] = useState("");
   const [batchDescription, setBatchDescription] = useState("");
   const [updateOpen, setUpdateOpen] = useState(false);
-  const user = JSON.parse(localStorage.getItem("user")); 
-  if(user === undefined){
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (user === undefined) {
     handleOnTokenNotFound();
   }
 
@@ -84,8 +84,8 @@ export default function Template() {
   const handleOnTokenNotFound = () => {
     history.push({ pathname: "/login" });
   };
-  function handleOnCard(id,superAdmin,adminId) {
-    history.push({ pathname: "/section", state: {id,superAdmin,adminId}});
+  function handleOnCard(id, superAdmin, adminId) {
+    history.push({ pathname: "/section", state: { id, superAdmin, adminId } });
   }
   //console.log("token ", localStorage.getItem("token"));
   if (localStorage.getItem("token") === null) {
@@ -101,35 +101,39 @@ export default function Template() {
   function handleUpdateOpen() {
     setUpdateOpen(true);
   }
-  function handleOnUpdatePop(upname, updes,upid) {
+  function handleOnUpdatePop(upname, updes, upid) {
     setBatchName(upname);
     setBatchDescription(updes);
     setBatchId(upid);
   }
   function handleOnUpdate() {
-    const ob = { batchId: batchId, name: batchName, description: batchDescription };
+    const ob = {
+      batchId: batchId,
+      name: batchName,
+      description: batchDescription,
+    };
     if (batchName === "") {
       setInvalidBatch("*Please fill out this field");
     } else {
-    axios
-      .post("/api/batches/update-batch", ob, axiosConfig)
-      .then(function (response) {
-        //handle Success
-        // console.log("hi", response);
-        console.log(response);
-        if ("error" in response.data) {
-          //  handleOnTokenNotFound();
-          console.log("galat h bhai ");
-        } else {
-          console.log("sahi h", response.data);
-          handleCancel();
-          window.location.reload(false);
-        }
-      })
-      .catch(function (error) {
-        // handle error
-        console.log("hii ", error);
-      });
+      axios
+        .post("/api/batches/update-batch", ob, axiosConfig)
+        .then(function (response) {
+          //handle Success
+          // console.log("hi", response);
+          console.log(response);
+          if ("error" in response.data) {
+            //  handleOnTokenNotFound();
+            console.log("galat h bhai ");
+          } else {
+            console.log("sahi h", response.data);
+            handleCancel();
+            window.location.reload(false);
+          }
+        })
+        .catch(function (error) {
+          // handle error
+          console.log("hii ", error);
+        });
     }
   }
 
@@ -488,7 +492,7 @@ export default function Template() {
                       title="Image title"
                       style={{ borderBottom: " 1px solid #3f51b5" }}
                       onClick={() => {
-                        handleOnCard(_id,superAdmin,adminId);
+                        handleOnCard(_id, superAdmin, adminId);
                       }}
                     />
                     <CardContent className={classes.cardContent}>
@@ -507,8 +511,7 @@ export default function Template() {
                         Batch Id : <br />
                         {_id}
                       </Typography>
-                      
-            
+
                       {(adminId.includes(user._id) ||
                         user._id === superAdmin) && (
                         <CardActions>
@@ -522,8 +525,9 @@ export default function Template() {
                           >
                             Update
                           </Button>
-                          
-                             {user._id === superAdmin && (<Button
+
+                          {user._id === superAdmin && (
+                            <Button
                               size="small"
                               color="primary"
                               onClick={() => {
@@ -531,8 +535,8 @@ export default function Template() {
                               }}
                             >
                               Delete
-                            </Button>)
-                          }
+                            </Button>
+                          )}
                         </CardActions>
                       )}
                     </CardContent>
