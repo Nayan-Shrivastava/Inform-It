@@ -21,20 +21,6 @@ router.post("/get-section", async(req,res) => {
      });
 });
 
-// Get Section object
-router.post("/get-notice", async(req,res) => {
-   const id = req.body.noticeId;
-   console.log(id);
-    Notice.findById(id)
-    .then((result) => {
-        console.log(result);
-        res.status(200).json(result);
-    })
-    .catch((err) => {
-        console.log(err);
-        res.status(404).json("notice not found");
-     });
-});
 
 
 
@@ -55,41 +41,55 @@ const addnoticeIdtoSection = (noticeId,sectionId) => {
 
 router.post("/create-notice/",verifyToken, async (req,res) => {
     verifyUser(req,res,(authData) => {
-        userId = authData._id;   
+        userId = authData._id;  
+        userName = authData.username; 
     });    
-
+        const batchId = req.body.batchId;
         const sectionId = req.body.sectionId; //user id
-        if (req.body.priority === ""){
-            req.body.priority = 2
-        }
-        if (req.body.impLinks === ""){
-            req.body.impLinks = []
-        }
-        else{
-            req.body.impLinks = req.body.impLinks.split(',')
-        }
-        try{
-            const section = await Section.findById(sectionId);
-            if(!section){
-                res.status(200).json({ error : "section not found"});
+
+
+        Batch.findById(batchId)
+        .then((batch) => {
+            if (!batch.adminId.includes(userId) && userId != batch.superAdmin ) {
+                res.status(200).json({
+                    error : "You are not An Admin"
+                });
             }else{
-                //if(section.adminId.includes(userId) || section.superAdmin === userId){
-                    try{
+
+                if (req.body.priority === ""){
+                    req.body.priority = 2
+                }
+
+                if (req.body.impLinks === ""){
+                    req.body.impLinks = []
+                }else{
+                    req.body.impLinks = req.body.impLinks.split(',')
+                }
+
+                if (req.body.priority === ""){
+                    req.body.priority = 2
+                }
+
+                if (req.body.body=== null || req.body.body.length === 0){
+                    req.body.body== " ";
+                }
+
+                try{
                         const newNotice = new Notice({
                             heading : req.body.heading,
                             subHeading : req.body.subHeading,
                             by : req.body.by,
                             body : req.body.body,
                             createdBy : userId,
-                            numberofPeople: 1,
+                            createdByName : userName,
                             priority : req.body.priority,
                             impLinks : req.body.impLinks,
                             deadline : req.body.deadline,
                             sectionId : sectionId
                         });
-                        console.log("newNotice",newNotice);
+                        //console.log("newNotice",newNotice);
                         // Save Notice and response
-                        await newNotice.save().then((notice) => {
+                        newNotice.save().then((notice) => {
                             console.log(notice._id,notice.sectionId);
                             addnoticeIdtoSection(notice._id,notice.sectionId);
                             res.status(200).json(notice);
@@ -103,15 +103,14 @@ router.post("/create-notice/",verifyToken, async (req,res) => {
                         res.status(500).json(err);
 
                     };
-    /*
-                }else{
-                    res.status(400).json("user is not admin");
-                }
-    */
+
             }
-        }catch(err){
-            res.status(200).json({ error : "section not found"});
-        }
+        })
+        .catch((err)=> {
+            console.log(err);
+            res.status(200).json({"error" : "batch not found"});
+
+        });  
 });
 
 // Get Section object with all it's notices
@@ -137,18 +136,20 @@ router.post("/get-all-notices",verifyToken, async(req,res) => {
                 
                     Notice.findById(x)
                     .then((b) => {
-                    arrnotices.push(JSON.parse(JSON.stringify(b)));
-                    //console.log(b);
-                    i += 1;
-                    if(result.noticeId.length == i){
-                        let copiedResult = JSON.parse(JSON.stringify(result));
-                        copiedResult.arrnotices = arrnotices.sort(function(a,b){
-                          // Turn your strings into dates, and then subtract them
-                          // to get a value that is either negative, positive, or zero.
-                          return new Date(b.updatedAt) - new Date(a.updatedAt);
-                      });
-                        console.log(copiedResult);
-                        res.status(200).json(copiedResult);
+                        if(b != null){
+                            arrnotices.push(JSON.parse(JSON.stringify(b)));
+                        }
+                        //console.log(b);
+                        i += 1;
+                        if(result.noticeId.length == i){
+                            let copiedResult = JSON.parse(JSON.stringify(result));
+                            copiedResult.arrnotices = arrnotices.sort(function(a,b){
+                              // Turn your strings into dates, and then subtract them
+                              // to get a value that is either negative, positive, or zero.
+                              return new Date(b.updatedAt) - new Date(a.updatedAt);
+                          });
+                            //console.log(copiedResult);
+                            res.status(200).json(copiedResult);
                     }
                 }).catch((err) => {
                     console.log(err);
