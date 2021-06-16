@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import axios from "axios";
+import SortIcon from "@material-ui/icons/Sort";
 import AppBar from "@material-ui/core/AppBar";
 import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card";
@@ -20,6 +21,12 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+//sort
+import EventBusyIcon from "@material-ui/icons/EventBusy";
+import PriorityHighIcon from "@material-ui/icons/PriorityHigh";
+import AccessTimeIcon from "@material-ui/icons/AccessTime";
+import SortByAlphaIcon from "@material-ui/icons/SortByAlpha";
+//
 import "./index.css";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -28,7 +35,41 @@ import InputLabel from "@material-ui/core/InputLabel";
 import FormControl from "@material-ui/core/FormControl";
 import Chip from "@material-ui/core/Chip";
 import CardActions from "@material-ui/core/CardActions";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemText from "@material-ui/core/ListItemText";
+import { withStyles } from "@material-ui/core/styles";
 
+const StyledMenu = withStyles({
+  paper: {
+    border: "1px solid #d3d4d5",
+  },
+})((props) => (
+  <Menu
+    elevation={0}
+    getContentAnchorEl={null}
+    anchorOrigin={{
+      vertical: "bottom",
+      horizontal: "center",
+    }}
+    transformOrigin={{
+      vertical: "top",
+      horizontal: "center",
+    }}
+    {...props}
+  />
+));
+const StyledMenuItem = withStyles((theme) => ({
+  root: {
+    "&:focus": {
+      backgroundColor: theme.palette.primary.main,
+      "& .MuiListItemIcon-root, & .MuiListItemText-primary": {
+        color: theme.palette.common.white,
+      },
+    },
+  },
+}))(MenuItem);
 const useStyles = makeStyles((theme) => ({
   icon: {
     marginRight: theme.spacing(2),
@@ -121,7 +162,53 @@ export default function Section(props) {
   //user
   const [updateOpen, setUpdateOpen] = useState(false);
   const [noticeId, setNoticeId] = useState("");
+  //sort
+  const [anchorEl, setAnchorEl] = useState(null);
+  const sortHandleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
 
+  const sortHandleClose = () => {
+    setAnchorEl(null);
+  };
+  const sortByName = () => {
+    setCards(
+      cards.sort((a, b) => {
+        return a.heading < b.heading ? -1 : 1;
+      })
+    );
+    sortHandleClose();
+  };
+  const sortByPriority = () => {
+    setCards(
+      cards.sort((a, b) => {
+        return a.priority > b.priority ? -1 : 1;
+      })
+    );
+    sortHandleClose();
+  };
+  const sortByDeadline = () => {
+    setCards(
+      cards.sort((a, b) => {
+        if (a.deadline === null) {
+          return 1;
+        }
+        if (b.deadline === null) {
+          return -1;
+        }
+        return a.deadline > b.deadline ? -1 : 1;
+      })
+    );
+    sortHandleClose();
+  };
+  const sortByTime = () => {
+    setCards(
+      cards.sort((a, b) => {
+        return new Date(b.updatedAt) - new Date(a.updatedAt);
+      })
+    );
+    sortHandleClose();
+  };
   // const [invalidSection, setInvalidSection] = useState("");
   const user = JSON.parse(localStorage.getItem("user"));
   if (user === undefined) {
@@ -522,6 +609,50 @@ export default function Section(props) {
                     </DialogActions>
                   </Dialog>
                 </Grid>
+                <Grid item>
+                  <Button
+                    variant="outlined"
+                    style={{ border: "2px solid black" }}
+                    aria-controls="customized-menu"
+                    aria-haspopup="true"
+                    onClick={sortHandleClick}
+                  >
+                    sort by
+                    <SortIcon color="white" style={{ marginLeft: "10px" }} />
+                  </Button>
+                  <StyledMenu
+                    id="customized-menu"
+                    anchorEl={anchorEl}
+                    keepMounted
+                    open={Boolean(anchorEl)}
+                    onClose={sortHandleClose}
+                  >
+                    <StyledMenuItem onClick={sortByName}>
+                      <ListItemIcon>
+                        <SortByAlphaIcon fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText primary="Name" />
+                    </StyledMenuItem>
+                    <StyledMenuItem onClick={sortByPriority}>
+                      <ListItemIcon>
+                        <PriorityHighIcon fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText primary="Priority" />
+                    </StyledMenuItem>
+                    <StyledMenuItem onClick={sortByDeadline}>
+                      <ListItemIcon>
+                        <EventBusyIcon fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText primary="Deadline" />
+                    </StyledMenuItem>
+                    <StyledMenuItem onClick={sortByTime}>
+                      <ListItemIcon>
+                        <AccessTimeIcon fontSize="small" />
+                      </ListItemIcon>
+                      <ListItemText primary="Time" />
+                    </StyledMenuItem>
+                  </StyledMenu>
+                </Grid>
               </Grid>
             </div>
           </Container>
@@ -706,6 +837,7 @@ export default function Section(props) {
         </Dialog>
         <Container className={classes.cardGrid} maxWidth="md">
           {/* End hero unit */}
+
           <Grid container spacing={4}>
             {cards.map(
               ({
@@ -782,10 +914,7 @@ export default function Section(props) {
                           (priority === 3 && `Priority: High`) ||
                           (priority === 4 && `Priority: Very High`)}
                       </Typography>
-                      <Typography>
-                        Created By : <br />
-                        {createdByName}
-                      </Typography>
+                      <Typography>Created By : {createdByName}</Typography>
                       <br></br>
                       {(location.state.adminId.includes(user._id) ||
                         user._id === location.state.superAdmin) && (
