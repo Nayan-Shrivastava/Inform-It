@@ -28,6 +28,7 @@ import AccessTimeIcon from "@material-ui/icons/AccessTime";
 import SortByAlphaIcon from "@material-ui/icons/SortByAlpha";
 //
 import "./index.css";
+
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import Select from "@material-ui/core/Select";
@@ -164,6 +165,12 @@ export default function Section(props) {
   const [noticeId, setNoticeId] = useState("");
   //sort
   const [anchorEl, setAnchorEl] = useState(null);
+  function validEmail(e) {
+    const regex = RegExp(
+      /^[a-zA-Z0-9.!#$%&’+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)$/
+    );
+    return regex.test(e);
+  }
   const sortHandleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -898,10 +905,13 @@ export default function Section(props) {
                           impLinks.length !== 0 &&
                           impLinks.map((imp) => (
                             <Typography>
-                              {/* <Link to={imp}>{imp}</Link> */}
-                              <a href={imp} target="_blank">
-                                {imp}
-                              </a>
+                              {validEmail(imp) ? (
+                                <a href="mailto: `${imp}`">{imp}</a>
+                              ) : (
+                                <a href={imp} target="_blank">
+                                  {imp}
+                                </a>
+                              )}
 
                               <br />
                             </Typography>
