@@ -403,8 +403,8 @@ export default function Section(props) {
                   <Card
                     className={classes.index}
                     style={{
-                      minHeight: "320px",
-                      maxHeight: "320px",
+                      minHeight: "400px",
+                      maxHeight: "400px",
                       backgroundImage:
                         // "linear-gradient(to right, #e0eafc, #cfdef3)",
                         "linear-gradient()",
