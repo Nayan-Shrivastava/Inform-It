@@ -69,59 +69,148 @@ router.post("/create-section/",verifyToken, async (req,res) => {
 });
 
 // Get batch object with all it's sections
+const getUserList = async(result) => {
+    var j = 0;
+    var arrusers = [];
+    if(result.peopleId.length !== 0){
+                    for (let x of result.peopleId){
+                        
+                        await User.findById(x)
+                        .then((b) => {
+                            
+                            if(b != null){
+                                if (result.adminId.includes(x) || result.superAdmin == x){
+                                    d = {name : b.name, username : b.username, userId : b._id, isAdmin: true }
+                                    arrusers.push(JSON.parse(JSON.stringify(d)));
+                                }else{
+                                    d = {name : b.name, username : b.username, userId : b._id, isAdmin: false }
+                                    arrusers.push(JSON.parse(JSON.stringify(d)));
+                                }
+                            }
+                            //console.log(b);
+                            j += 1;
+                            if(result.peopleId.length == j){
+                                //console.log("j",j);
+                                //console.log("User j",j, arrusers);
+                                result.arrusers =   arrusers.sort(function(a,b){
+                                  // Turn your strings into dates, and then subtract them
+                                  // to get a value that is either negative, positive, or zero.
+                                  return b.username - a.username;
+                                
+                                });
+                                return arrusers;
+                                  
+                            }
+                        }).catch((err) => {
+                            //console.log(err);
+                            j += 1
+                            if(result.peopleId.length == j){
+                                //console.log("j",j);
+                                result.arrusers =   arrusers.sort(function(a,b){
+                                  // Turn your strings into dates, and then subtract them
+                                  // to get a value that is either negative, positive, or zero.
+                                  return b.username - a.username;
+                                  
+                                });
+                                return arrusers;
+                                
+                            }
+
+                        });
+                }
+            }else{
+                //let copiedResult = JSON.parse(JSON.stringify(result));
+                result.arrusers =  [];
+                return arrusers;               
+            }
+};
+
+
+const getSectionList = async(result) => {
+    var i = 0;
+    var arrsections = [];
+    if(result.sectionId.length !== 0){
+                    for (let x of result.sectionId){
+                        
+                        await Section.findById(x)
+                        .then((b) => {
+                            //console.log("section i",i)
+                            if(b != null){
+                                  arrsections.push(JSON.parse(JSON.stringify(b)));
+                            }
+                            //console.log(b);
+                            i += 1;
+                            if(result.sectionId.length == i){
+                                //console.log("i",i);
+                                result.arrsections =   arrsections.sort(function(a,b){
+                                  // Turn your strings into dates, and then subtract them
+                                  // to get a value that is either negative, positive, or zero.
+                                  return new Date(b.updatedAt) - new Date(a.updatedAt);
+                                
+                                }); 
+                                return arrsections;
+                                
+                            }
+                        }).catch((err) => {
+                            //console.log(err);
+                            i += 1
+                            if(result.sectionId.length == i){
+                                //console.log("i",i);
+                                result.arrsections =   arrsections.sort(function(a,b){
+                                  // Turn your strings into dates, and then subtract them
+                                  // to get a value that is either negative, positive, or zero.
+                                  return new Date(b.updatedAt) - new Date(a.updatedAt);
+                                
+                                });  
+                                return arrsections;
+                                  
+                            }
+
+                        });
+                }
+            }else{
+                //let copiedResult = JSON.parse(JSON.stringify(result));
+                result.arrsections =  []; 
+                return arrsections;               
+            }
+};
+
+
 router.post("/get-all-sections",verifyToken, async(req,res) => {
     verifyUser(req,res,(authData) => {
 
         const id = req.body.batchId;
         
         Batch.findById(id)
-        .then((result) => {
+        .then( (result) => {
             
-            console.log(result.sectionId)
+            //console.log(result.sectionId)
             //res.status(200).json(result);
-            let arrsections = [];
-
+            var copiedResult = JSON.parse(JSON.stringify(result));
+            //console.log("result.peopleId.length",result.peopleId.length)
+            a = async (copiedResult) =>{
+                await getUserList(copiedResult);
+                await getSectionList(copiedResult);
+                
+            };
             
-            var i = 0;
-            if (result.sectionId.length !== 0){
-                for (let x of result.sectionId){
-                    
-                        Section.findById(x)
-                        .then((b) => {
-                            if(b != null){
-                                arrsections.push(JSON.parse(JSON.stringify(b)));
-                            }
-                        //console.log(b);
-                        i += 1;
-                        if(result.sectionId.length == i){
-                            let copiedResult = JSON.parse(JSON.stringify(result));
-                            copiedResult.arrsections = arrsections.sort(function(a,b){
-                              // Turn your strings into dates, and then subtract them
-                              // to get a value that is either negative, positive, or zero.
-                              return new Date(b.updatedAt) - new Date(a.updatedAt);;
-                            });  
-                            console.log(copiedResult);
-                            res.status(200).json(copiedResult);
-                        }
-                    }).catch((err) => {
-                        console.log(err);
-                        i += 1
-                    });
-                }
-            }else{
-                let copiedResult = JSON.parse(JSON.stringify(result));
-                copiedResult.arrsections = [];
+            a(copiedResult)
+            .then((result) => {
+                //console.log("listing",result)
+                //console.log(copiedResult.arrusers,copiedResult.arrsections);
+                //copiedResult.arrusers = arrusers;
+                //copiedResult.arrsections = arrsections;
                 res.status(200).json(copiedResult);
-            }
+            });
+                
+
         })
         .catch((err) => {
             console.log(err);
             res.status(200).json({"error": "Batch not found"});
         });
     }); 
-});  
-
-
+});
 
 
 // Get Batch object

@@ -203,11 +203,7 @@ router.post("/get-all-batches",verifyToken, async(req,res) => {
                 i += 1;
                 if(result.batchesId.length == i){
                     let copiedResult = JSON.parse(JSON.stringify(result));
-                    copiedResult.arrbatches = arrbatches.sort(function(a,b){
-                          // Turn your strings into dates, and then subtract them
-                          // to get a value that is either negative, positive, or zero.
-                          return new Date(b.updatedAt) - new Date(a.updatedAt);;
-                      });
+                    copiedResult.arrbatches = arrbatches;
                     // console.log(copiedResult);
                     res.status(200).json(copiedResult);
                 }

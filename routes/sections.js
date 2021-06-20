@@ -21,6 +21,20 @@ router.post("/get-section", async(req,res) => {
      });
 });
 
+// Get Section object
+router.post("/get-notice", async(req,res) => {
+   const id = req.body.noticeId;
+   console.log(id);
+    Notice.findById(id)
+    .then((result) => {
+        console.log(result);
+        res.status(200).json(result);
+    })
+    .catch((err) => {
+        console.log(err);
+        res.status(404).json("notice not found");
+     });
+});
 
 
 
@@ -37,7 +51,6 @@ const addnoticeIdtoSection = (noticeId,sectionId) => {
         }
     });
 }
-
 
 router.post("/create-notice/",verifyToken, async (req,res) => {
     verifyUser(req,res,(authData) => {
@@ -136,20 +149,20 @@ router.post("/get-all-notices",verifyToken, async(req,res) => {
                 
                     Notice.findById(x)
                     .then((b) => {
-                        if(b != null){
-                            arrnotices.push(JSON.parse(JSON.stringify(b)));
-                        }
-                        //console.log(b);
-                        i += 1;
-                        if(result.noticeId.length == i){
-                            let copiedResult = JSON.parse(JSON.stringify(result));
-                            copiedResult.arrnotices = arrnotices.sort(function(a,b){
-                              // Turn your strings into dates, and then subtract them
-                              // to get a value that is either negative, positive, or zero.
-                              return new Date(b.updatedAt) - new Date(a.updatedAt);
-                          });
-                            //console.log(copiedResult);
-                            res.status(200).json(copiedResult);
+                    if(b!==null){
+                        arrnotices.push(JSON.parse(JSON.stringify(b)));
+                    }
+                    //console.log(b);
+                    i += 1;
+                    if(result.noticeId.length == i){
+                        let copiedResult = JSON.parse(JSON.stringify(result));
+                        copiedResult.arrnotices = arrnotices.sort(function(a,b){
+                          // Turn your strings into dates, and then subtract them
+                          // to get a value that is either negative, positive, or zero.
+                          return new Date(b.updatedAt) - new Date(a.updatedAt);
+                      })
+                        //console.log(copiedResult);
+                        res.status(200).json(copiedResult);
                     }
                 }).catch((err) => {
                     console.log(err);
