@@ -21,6 +21,15 @@ import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import CardActions from "@material-ui/core/CardActions";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemAvatar from "@material-ui/core/ListItemAvatar";
+import HowToRegIcon from "@material-ui/icons/HowToReg";
+import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
+import Avatar from "@material-ui/core/Avatar";
+import PeopleOutlineIcon from "@material-ui/icons/PeopleOutline";
 
 const useStyles = makeStyles((theme) => ({
   icon: {
@@ -73,13 +82,22 @@ export default function Section(props) {
   const [updateOpen, setUpdateOpen] = useState(false);
   const [sectionId, setSectionId] = useState("");
   const [invalidSection, setInvalidSection] = useState("");
+
   const user = JSON.parse(localStorage.getItem("user"));
   if (user === undefined) {
     handleOnTokenNotFound();
   }
-  function handleOnCard(id) {
-    history.push({ pathname: "/notice", state: {id,batchId: location.state.id,superAdmin: location.state.superAdmin,adminId:location.state.adminId} });
 
+  function handleOnCard(id) {
+    history.push({
+      pathname: "/notice",
+      state: {
+        id,
+        batchId: location.state.id,
+        superAdmin: location.state.superAdmin,
+        adminId: location.state.adminId,
+      },
+    });
   }
   const handleOnTokenNotFound = () => {
     history.push({ pathname: "/login" });
@@ -166,6 +184,7 @@ export default function Section(props) {
     setInvalidSection("");
     setSectionId("");
     setUpdateOpen(false);
+    setMembers(false);
   };
   const handleOnClose = (e) => {
     e.preventDefault();
@@ -199,6 +218,32 @@ export default function Section(props) {
         });
     }
   };
+  //for members
+  const [members, setMembers] = useState(false);
+  const [memberList, setMemberList] = useState([]);
+  function handleOnMembers() {
+    setMembers(true);
+  }
+  function handleOnAdmin(userId) {
+    axios
+      .post(
+        "/api/batches/make-admin",
+        { batchId: location.state.id, newAdmin: userId },
+        axiosConfig
+      )
+      .then(function (response) {
+        //handle Success
+        if ("error" in response.data) {
+          console.log(response);
+        } else {
+          window.location.reload(false);
+        }
+      })
+      .catch(function (error) {
+        // handle error
+        console.log(error);
+      });
+  }
   useEffect(() => {
     // console.log(location.state);
 
@@ -217,8 +262,8 @@ export default function Section(props) {
           //console.log("hii", response);
           setCards(response.data.arrsections);
           setName(response.data.name);
-
-          // console.log("hello ");
+          setMemberList(response.data.arrusers);
+          // console.log("hello users ",memberList);
         }
       })
       .catch(function (error) {
@@ -338,6 +383,98 @@ export default function Section(props) {
                     </DialogActions>
                   </Dialog>
                 </Grid>
+                <Grid item>
+                  <Button
+                    variant="outlined"
+                    style={{ border: "2px solid black", height: "36px" }}
+                    onClick={handleOnMembers}
+                  >
+                    Members
+                    <PeopleOutlineIcon
+                      color="white"
+                      style={{ marginLeft: "10px" }}
+                    />
+                  </Button>
+                  <Dialog
+                    open={members}
+                    onClose={handleCancel}
+                    fullWidth
+                    aria-labelledby="form-dialog-title"
+                  >
+                    {/* <DialogTitle id="form-dialog-title">
+                      Members
+                    </DialogTitle> */}
+                    <DialogContent>
+                      <List dense className={classes.root}>
+                        {memberList.map(
+                          ({ index, name, username, userId, isAdmin }) => {
+                            // const labelId = `checkbox-list-secondary-label-${value}`;
+
+                            return (
+                              <ListItem key={index} button>
+                                <ListItemAvatar>
+                                  <Avatar
+                                    alt={`Avatar n°${1}`}
+                                    src={`/static/images/avatar/${1}.jpg`}
+                                  />
+                                </ListItemAvatar>
+                                <ListItemText
+                                  // id={labelId}
+                                  primary={username}
+                                  secondary={name}
+                                />
+
+                                <ListItemSecondaryAction>
+                                  {isAdmin && (
+                                    <Typography
+                                      color="primary"
+                                      size="small"
+                                      variant="outlined"
+                                      style={{
+                                        border: "1px solid blue",
+                                        borderRadius: "5px",
+                                        textAlign: "center",
+                                        padding: "3px",
+                                      }}
+                                    >
+                                      Admin
+                                    </Typography>
+                                  )}
+
+                                  {(location.state.adminId.includes(user._id) ||
+                                    user._id === location.state.superAdmin) && (
+                                    <>
+                                      <Button
+                                        edge="end"
+                                        color="primary"
+                                        onClick={() => {
+                                          handleOnAdmin(userId);
+                                        }}
+                                      >
+                                        <HowToRegIcon />
+                                      </Button>
+                                      <Button
+                                        edge="end"
+                                        style={{ color: "red" }}
+                                      >
+                                        <RemoveCircleIcon />
+                                      </Button>
+                                    </>
+                                  )}
+                                </ListItemSecondaryAction>
+                              </ListItem>
+                            );
+                          }
+                        )}
+                      </List>
+                    </DialogContent>
+                    <DialogActions>
+                      <Button onClick={handleCancel} color="primary">
+                        Back
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
+                </Grid>
               </Grid>
             </div>
           </Container>
@@ -388,83 +525,74 @@ export default function Section(props) {
         </Dialog>
         <Container className={classes.cardGrid} maxWidth="md">
           {/* End hero unit */}
-          <Grid container spacing={4}>
-            {cards.map(
-              ({
-                index,
-                name,
-                description,
-                createdAt,
-              
-                _id,
-               
-              }) => (
-                <Grid item key={index} xs={12} sm={6} md={4}>
-                  <Card
-                    className={classes.index}
-                    style={{
-                      minHeight: "400px",
-                      maxHeight: "400px",
-                      backgroundImage:
-                        // "linear-gradient(to right, #e0eafc, #cfdef3)",
-                        "linear-gradient()",
-                      border: " 1px solid #3f51b5",
-                    }}
-                  >
-                    <CardMedia
-                      className={classes.cardMedia}
-                      image={`./../assets/images/${images[0]}`}
-                      title="Image title"
-                      style={{ borderBottom: " 1px solid #3f51b5" }}
-                      onClick={() => {
-                        handleOnCard(_id);
-                      }}
-                    />
-                    <CardContent className={classes.cardContent}>
-                      <Typography gutterBottom variant="h5" component="h2">
-                        {name}
-                      </Typography>
-                      <Typography>
-                        {description.length > 100 &&
-                          `${description.substring(0, 100)}...`}
 
-                        {description.length <= 100 && `${description}`}
-                      </Typography>
-                      <br />
-                      {/* <Typography>
+          <Grid container spacing={4}>
+            {cards.map(({ index, name, description, createdAt, _id }) => (
+              <Grid item key={index} xs={12} sm={6} md={4}>
+                <Card
+                  className={classes.index}
+                  style={{
+                    minHeight: "400px",
+                    maxHeight: "400px",
+                    backgroundImage:
+                      // "linear-gradient(to right, #e0eafc, #cfdef3)",
+                      "linear-gradient()",
+                    border: " 1px solid #3f51b5",
+                  }}
+                >
+                  <CardMedia
+                    className={classes.cardMedia}
+                    image={`./../assets/images/${images[0]}`}
+                    title="Image title"
+                    style={{ borderBottom: " 1px solid #3f51b5" }}
+                    onClick={() => {
+                      handleOnCard(_id);
+                    }}
+                  />
+                  <CardContent className={classes.cardContent}>
+                    <Typography gutterBottom variant="h5" component="h2">
+                      {name}
+                    </Typography>
+                    <Typography>
+                      {description.length > 100 &&
+                        `${description.substring(0, 100)}...`}
+
+                      {description.length <= 100 && `${description}`}
+                    </Typography>
+                    <br />
+                    {/* <Typography>
                         Created On : {createdAt.slice(0, 10)}
                       </Typography> */}
-                      {/* <Typography>Created By : {createdBy}</Typography> */}
+                    {/* <Typography>Created By : {createdBy}</Typography> */}
 
-                      {(location.state.adminId.includes(user._id) ||
-                        user._id === location.state.superAdmin) && (
-                        <CardActions>
-                          <Button
-                            size="small"
-                            color="primary"
-                            onClick={() => {
-                              handleUpdateOpen();
-                              handleOnUpdatePop(name, description, _id);
-                            }}
-                          >
-                            Update
-                          </Button>
-                          <Button
-                            size="small"
-                            color="primary"
-                            onClick={() => {
-                              handleOnDelete(_id);
-                            }}
-                          >
-                            Delete
-                          </Button>
-                        </CardActions>
-                      )}
-                    </CardContent>
-                  </Card>
-                </Grid>
-              )
-            )}
+                    {(location.state.adminId.includes(user._id) ||
+                      user._id === location.state.superAdmin) && (
+                      <CardActions>
+                        <Button
+                          size="small"
+                          color="primary"
+                          onClick={() => {
+                            handleUpdateOpen();
+                            handleOnUpdatePop(name, description, _id);
+                          }}
+                        >
+                          Update
+                        </Button>
+                        <Button
+                          size="small"
+                          color="primary"
+                          onClick={() => {
+                            handleOnDelete(_id);
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </CardActions>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
           </Grid>
         </Container>
       </main>

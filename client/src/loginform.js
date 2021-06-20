@@ -322,30 +322,7 @@ export default function Loginform(props) {
             {invalidName !== undefined && (
               <p style={{ color: "red" }}>{invalidName}</p>
             )}
-            {/* <TextField
-              htmlFor="outlined-adornment-password"
-              variant="outlined"
-              autoFocus
-              margin="dense"
-              id="regPassword"
-              label="Password"
-              type={showPwd ? "text" : "password"}
-              fullWidth
-              required
-              onChange={(e) => setRegPassword(e.target.value)}
-              endAdornment={
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={handleClickShowPassword}
-                    onMouseDown={handleMouseDownPassword}
-                    edge="end"
-                  >
-                    {showPwd ? <VisibilityIcon /> : <VisibilityOffIcon />}
-                  </IconButton>
-                </InputAdornment>
-              }
-            /> */}
+           
             <FormControl
               className={clsx(classes.margin, classes.textField)}
               variant="outlined"

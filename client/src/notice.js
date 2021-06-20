@@ -619,13 +619,14 @@ export default function Section(props) {
                 <Grid item>
                   <Button
                     variant="outlined"
-                    style={{ border: "2px solid black" }}
+                    style={{ border: "2px solid black", height: "36px" }}
                     aria-controls="customized-menu"
                     aria-haspopup="true"
                     onClick={sortHandleClick}
                   >
                     sort by
                     <SortIcon color="white" style={{ marginLeft: "10px" }} />
+                    
                   </Button>
                   <StyledMenu
                     id="customized-menu"
