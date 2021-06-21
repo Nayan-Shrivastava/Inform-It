@@ -68,7 +68,113 @@ router.post("/create-section/",verifyToken, async (req,res) => {
         });
 });
 
+
+/*
 // Get batch object with all it's sections
+router.post("/get-all-sections",verifyToken, async(req,res) => {
+    verifyUser(req,res,(authData) => {
+
+        const id = req.body.batchId;
+        
+        Batch.findById(id)
+        .then(async (result) => {
+            
+            //console.log(result.sectionId)
+            //res.status(200).json(result);
+            var arrsections = [];
+            var arrusers = [];
+            var copiedResult = JSON.parse(JSON.stringify(result));
+            var i = 0;
+            var j = 0;
+
+            console.log("result.peopleId.length",result.peopleId.length)
+            if(result.peopleId.length !== 0){
+                    for (let x of result.peopleId){
+                        
+                        User.findById(x)
+                        .then((b) => {
+                            console.log("j",j)
+                            if(b != null){
+                                if (result.adminId.includes(x)){
+                                    d = {name : b.name, username : b.username, userId : b._id, isAdmin: true }
+                                    arrusers.push(JSON.parse(JSON.stringify(b)));
+                                }else{
+                                    d = {name : b.name, username : b.username, userId : b._id, isAdmin: false }
+                                    arrusers.push(JSON.parse(JSON.stringify(b)));
+                                }
+                            }
+                            //console.log(b);
+                            j += 1;
+                            if(result.peopleId.length == j){
+                                console.log("j",j);
+                                copiedResult.arrusers = arrusers.sort(function(a,b){
+                                  // Turn your strings into dates, and then subtract them
+                                  // to get a value that is either negative, positive, or zero.
+                                  return new Date(b.name) - new Date(a.name);
+                                });  
+                            }
+                        }).catch((err) => {
+                            console.log(err);
+                            j += 1
+                        });
+                }
+            }else{
+                //let copiedResult = JSON.parse(JSON.stringify(result));
+                copiedResult.arrusers = [];
+                
+            }
+
+            if (result.sectionId.length !== 0){
+
+               for (let x of result.sectionId){
+                    console.log("i",i);
+                    Section.findById(x)
+                    .then((b) => {
+                        console.log("i",i);
+                        if(b != null){
+                            arrsections.push(JSON.parse(JSON.stringify(b)));
+                        }
+                        //console.log(b);
+                        i += 1;
+                        console.log("i",i);
+                        if(result.sectionId.length == i){
+                            let copiedResult = JSON.parse(JSON.stringify(result));
+                            copiedResult.arrsections = arrsections.sort(function(a,b){
+                              // Turn your strings into dates, and then subtract them
+                              // to get a value that is either negative, positive, or zero.
+                              return new Date(b.updatedAt) - new Date(a.updatedAt);
+                            });
+                        }
+                    }).catch((err) => {
+                        console.log(err);
+                        i += 1
+                    });
+                }
+            }else{
+                //let copiedResult = JSON.parse(JSON.stringify(result));
+                copiedResult.arrsections = [];
+                
+            }
+
+            console.log(result.sectionId.length , i ,"=======", result.peopleId.length , j)
+            while(true){
+                console.log(false);
+                if(copiedResult.arrusers && copiedResult.arrsections){
+                    console.log(false);
+                    res.status(200).json(copiedResult);
+                    break;
+                }
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(200).json({"error": "Batch not found"});
+        });
+    }); 
+});  
+
+*/
+
 const getUserList = async(result) => {
     var j = 0;
     var arrusers = [];
@@ -95,21 +201,21 @@ const getUserList = async(result) => {
                                 result.arrusers =   arrusers.sort(function(a,b){
                                   // Turn your strings into dates, and then subtract them
                                   // to get a value that is either negative, positive, or zero.
-                                  return b.username - a.username;
+                                  return b.username.toLowerCase() -  a.username.toLowerCase();
                                 
                                 });
                                 return arrusers;
                                   
                             }
                         }).catch((err) => {
-                            //console.log(err);
+                            console.log(err);
                             j += 1
                             if(result.peopleId.length == j){
                                 //console.log("j",j);
                                 result.arrusers =   arrusers.sort(function(a,b){
                                   // Turn your strings into dates, and then subtract them
                                   // to get a value that is either negative, positive, or zero.
-                                  return b.username - a.username;
+                                  return b.username -  a.username;
                                   
                                 });
                                 return arrusers;
@@ -196,10 +302,8 @@ router.post("/get-all-sections",verifyToken, async(req,res) => {
             
             a(copiedResult)
             .then((result) => {
-                //console.log("listing",result)
-                //console.log(copiedResult.arrusers,copiedResult.arrsections);
-                //copiedResult.arrusers = arrusers;
-                //copiedResult.arrsections = arrsections;
+                console.log(copiedResult.arrsections);
+                console.log(copiedResult.arrsections);
                 res.status(200).json(copiedResult);
             });
                 
@@ -210,7 +314,7 @@ router.post("/get-all-sections",verifyToken, async(req,res) => {
             res.status(200).json({"error": "Batch not found"});
         });
     }); 
-});
+});  
 
 
 // Get Batch object
@@ -294,7 +398,12 @@ router.post("/update-batch",verifyToken, async(req,res) => {
     });    
 });
 
-
+function arrayRemove(arr, value) { 
+    
+        return arr.filter(function(ele){ 
+            return ele != value; 
+        });
+    }
 router.post("/make-admin", verifyToken, (req,res) => {
     verifyUser(req,res,(authData) => {
         userId = authData._id;
@@ -348,6 +457,92 @@ router.post("/make-admin", verifyToken, (req,res) => {
         });
 
 });
+
+
+router.post("/remove-user", verifyToken, (req,res) => {
+    verifyUser(req,res,(authData) => {
+        userId = authData._id;
+        username = authData.username
+    });
+
+    const batchId = req.body.batchId;
+    const removeUserId = req.body.removeUserId;
+
+    Batch.findById(batchId)
+    .then( async (batch) => {
+        if(!batch){
+            //console.log("error 1")
+            res.status(200).json( { error : "batch not found"} );
+        }
+        else if (!batch.adminId.includes(userId) && userId != batch.superAdmin ) {
+            res.status(200).json({
+                error : "not admin"
+            });
+        }else if (!batch.peopleId.includes(removeUserId)) {
+            res.status(200).json({
+                error : "not member"
+            });
+        }
+        else{
+                try{
+                    var PeopleId2 = arrayRemove(batch.peopleId,removeUserId); 
+                    await Batch.findByIdAndUpdate(batchId,{ peopleId: PeopleId2 },(err,result) => {
+                        if(err){
+                            console.log(err);
+                            console.log("------- remove-user-PeopleId failed -------");
+                        }
+                        else{
+                            //console.log(result);
+                            console.log("------- remove-user-PeopleId Success -------");
+                            
+                        }
+                    });
+                     
+                    
+
+                    
+
+                    await User.findById(removeUserId)
+                    .then(async(user) => {
+                        var batchesId2 = arrayRemove(user.batchesId,batchId);
+                        await User.findByIdAndUpdate(removeUserId,{ batchesId: batchesId2 },(err,result) => {
+                        if(err){
+                            console.log(err);
+                            console.log("------- remove-user-SectionId failed -------");
+                        }
+                        else{
+                            //console.log(result);
+                            //console.log("------- remove-user-SectionId Success -------");
+                            
+                        }
+                    });
+                        
+                        
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        res.status(404).json("User not found");
+                    });
+
+
+
+                    res.status(200).json({
+                                message : "success"
+                            })
+                }catch(err){
+                    res.status(500).json(err);
+
+                };
+            }
+        })
+        .catch((err)=> {
+            console.log(err);
+            res.status(200).json( { error : "batch not found"} );
+
+        });
+
+});
+
 
 
 router.get("/", (req,res) => {
