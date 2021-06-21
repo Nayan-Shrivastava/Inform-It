@@ -82,6 +82,8 @@ export default function Section(props) {
   const [updateOpen, setUpdateOpen] = useState(false);
   const [sectionId, setSectionId] = useState("");
   const [invalidSection, setInvalidSection] = useState("");
+  //avatar color
+  
 
   const user = JSON.parse(localStorage.getItem("user"));
   if (user === undefined) {
@@ -229,6 +231,26 @@ export default function Section(props) {
       .post(
         "/api/batches/make-admin",
         { batchId: location.state.id, newAdmin: userId },
+        axiosConfig
+      )
+      .then(function (response) {
+        //handle Success
+        if ("error" in response.data) {
+          console.log(response);
+        } else {
+          window.location.reload(false);
+        }
+      })
+      .catch(function (error) {
+        // handle error
+        console.log(error);
+      });
+  }
+  function handleOnRemove(userId){
+    axios
+      .post(
+        "/api/batches/remove-user",
+        { batchId: location.state.id, removeUserId: userId },
         axiosConfig
       )
       .then(function (response) {
@@ -408,15 +430,23 @@ export default function Section(props) {
                       <List dense className={classes.root}>
                         {memberList.map(
                           ({ index, name, username, userId, isAdmin }) => {
+                          
+                              var randomColor =  "#" + Math.floor(
+                                Math.random() * 16777215
+                              ).toString(16);
+                            
                             // const labelId = `checkbox-list-secondary-label-${value}`;
 
                             return (
                               <ListItem key={index} button>
                                 <ListItemAvatar>
                                   <Avatar
-                                    alt={`Avatar n°${1}`}
-                                    src={`/static/images/avatar/${1}.jpg`}
-                                  />
+                                    style={{
+                                      backgroundColor: randomColor,
+                                    }}
+                                  >
+                                    {username[0].toUpperCase()}
+                                  </Avatar>
                                 </ListItemAvatar>
                                 <ListItemText
                                   // id={labelId}
@@ -456,6 +486,9 @@ export default function Section(props) {
                                       <Button
                                         edge="end"
                                         style={{ color: "red" }}
+                                        onClick={() => {
+                                          handleOnRemove(userId);
+                                        }}
                                       >
                                         <RemoveCircleIcon />
                                       </Button>
