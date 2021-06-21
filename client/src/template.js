@@ -313,6 +313,7 @@ export default function Template() {
             <div className={classes.heroButtons}>
               <Grid container spacing={2} justify="center">
                 <Grid item>
+               
                   <Button
                     variant="contained"
                     color="primary"
@@ -507,10 +508,12 @@ export default function Template() {
                       </Typography>
                       <br />
                       <Typography>Created By : {superAdminName}</Typography>
+                      {(adminId.includes(user._id) ||
+                        user._id === superAdmin) && (
                       <Typography>
                         Batch Id : <br />
                         {_id}
-                      </Typography>
+                      </Typography>)}
 
                       {(adminId.includes(user._id) ||
                         user._id === superAdmin) && (
